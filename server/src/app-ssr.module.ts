@@ -1,16 +1,11 @@
 import { Module } from '@nestjs/common';
-import { AngularUniversalModule } from '@nestjs/ng-universal';
-import { join } from 'path';
-import { AppServerModule } from '../../client/src/main.server';
+import { AngularUniversalModule } from './app-universal.module';
 import { AppModule } from './app.module';
 
 @Module({
   imports: [
     AppModule,
-    AngularUniversalModule.forRoot({
-      bootstrap: AppServerModule,
-      viewsPath : join(process.cwd(), 'dist/eshop/browser')
-    })
-  ]
+    AngularUniversalModule,
+  ],
 })
 export class AppSSRModule {}

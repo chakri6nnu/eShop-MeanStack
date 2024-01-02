@@ -1,10 +1,10 @@
-import { Document, Model, DocumentQuery } from 'mongoose';
+import { Document, Model } from 'mongoose';
 
 export interface Product extends Document {
     _id: string;
     title: string;
     description: string;
-    descriptionFull: any;
+    descriptionFull: string[];
     tags: string[];
     regularPrice: number;
     salePrice: number;
@@ -12,10 +12,10 @@ export interface Product extends Document {
     onSale: boolean;
     stock: string;
     visibility: boolean;
-    shipping?           : string;
+    shipping?: string;
     mainImage: { url: string; name: string };
     images: string[];
-    _user: any;
+    _user: string;
     dateAdded?: Date;
 }
 
@@ -28,7 +28,7 @@ export interface PaginateOptions {
 }
 
 export interface ProductModel extends Model<Product> {
-    paginate(query: any, options: PaginateOptions): DocumentQuery<ProductsWithPagination, Product>;
+    paginate(query: any, options: PaginateOptions);
 }
 
 export interface ProductsWithPagination {

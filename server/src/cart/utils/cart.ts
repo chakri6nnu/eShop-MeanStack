@@ -1,13 +1,15 @@
-export class Cart {
-  items: [];
+import { Product } from '../../products/models/product.model';
+import { CartModel } from './../models/cart.model';
 
-  constructor(previousCart) {
+export class Cart {
+  items: Product[];
+
+  constructor(previousCart: CartModel) {
     this.items = previousCart.items || [];
   }
 
-  add = function (item, id: string) {
-    const itemExist = !!this.items.filter((cartItem) => cartItem.id === id)
-      .length;
+  add = function (item: Product, id: string): void {
+    const itemExist = !!this.items.filter((cartItem) => cartItem.id === id).length;
 
     if (!itemExist) {
       this.items.push({ item, id, qty: 1 });
@@ -20,7 +22,7 @@ export class Cart {
     }
   };
 
-  remove = function (id: string) {
+  remove = function (id: string): void {
     this.items = this.items
       .map((cartItem) => {
         if (cartItem.id === id && cartItem.qty > 1) {
@@ -33,7 +35,7 @@ export class Cart {
       .filter((cartItem) => cartItem.id);
   };
 
-  check = function (id: string) {
+  check = function (id: string): Product[] {
     return this.items.find((cartItem) => cartItem.id === id);
   };
 }

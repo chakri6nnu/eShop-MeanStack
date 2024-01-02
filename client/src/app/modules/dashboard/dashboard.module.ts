@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FileUploadModule } from 'ng2-file-upload';
 import { EditorModule } from '@tinymce/tinymce-angular';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -25,7 +24,10 @@ import { PipeModule } from '../../pipes/pipe.module';
 import { TranslationsEditComponent } from './translations-edit/translations-edit.component';
 import { AllProductsComponent } from './all-products/all-products.component';
 import { PagesEditComponent } from './pages-edit/pages-edit.component';
+import { ThemeEditComponent } from './theme-edit/theme-edit.component';
 import { CategoriesEditComponent } from './categories-edit/categories-edit.component';
+import { ConfigEditComponent } from './config-edit/config-edit.component';
+import { OrderComponentsModule } from '../order/components/order-components.module';
 
 
 const DASHBOARD_ROUTER: Routes = [
@@ -51,9 +53,9 @@ const DASHBOARD_ROUTER: Routes = [
   imports: [
     CommonModule,
     SharedModule,
+    OrderComponentsModule,
     FormsModule,
     ReactiveFormsModule,
-    FileUploadModule,
     PipeModule,
     RouterModule.forChild(DASHBOARD_ROUTER),
     EditorModule,
@@ -76,7 +78,9 @@ const DASHBOARD_ROUTER: Routes = [
     DashboardComponent,
     TinyEditorComponent,
     TranslationsEditComponent,
-    PagesEditComponent
+    PagesEditComponent,
+    ThemeEditComponent,
+    ConfigEditComponent
   ]
 })
 export class DashboardModule { }

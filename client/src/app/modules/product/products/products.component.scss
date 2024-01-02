@@ -1,5 +1,3 @@
-@import 'variables';
-
 :host {
   display: flex;
   min-height: 100vh;
@@ -12,9 +10,10 @@
 
   .products {
     &-primary-header {
-      color: $primary-color;
+      color: var(--primary-color);
       background: #fff;
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      position: relative;
     }
 
     &-primary-container {
@@ -25,11 +24,19 @@
       font-weight: 500;
       margin: 0;
       padding: 0;
-      color: $primary-color;
+      color: var(--primary-color);
       text-align: center;
       font-size: 1.2em;
       line-height: 1.2em;
       text-transform: capitalize;
+    }
+
+    &-description {
+      text-align: center;
+      margin: 0;
+      font-size: 14px;
+      color: var(--primary-color);
+      line-height: 16px;
     }
 
     &-spinner {
@@ -54,7 +61,7 @@
       display: none;
 
       @media screen and (max-width: 600px) {
-        color: $primary-color;
+        color: var(--primary-color);
         position: absolute;
         display: flex;
         cursor: pointer;

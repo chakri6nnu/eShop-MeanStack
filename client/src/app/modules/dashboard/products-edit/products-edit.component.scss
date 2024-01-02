@@ -1,10 +1,10 @@
 :host {
-  /deep/ .mat-radio-button ~ .mat-radio-button {
+  ::ng-deep .mat-mdc-radio-button ~ .mat-radio-button {
     margin-left: 16px;
   }
 
   @media screen and (max-width: 600px) {
-    /deep/ .mat-radio-button ~ .mat-radio-button {
+    ::ng-deep .mat-mdc-radio-button ~ .mat-radio-button {
       margin-left: 4px;
     }
   }
@@ -74,6 +74,13 @@
 
   .file-field .btn {
     float: none !important;
+  }
+
+  .file-field {
+    background-color: #262626;
+    padding: 10px;
+    border-radius: 6px;
+    color: #fff;
   }
 
   .image-dash-wrap {

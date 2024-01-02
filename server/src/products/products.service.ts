@@ -8,13 +8,13 @@ import { GetProductDto } from './dto/get-product';
 import { Category, CategoryModel } from './models/category.model';
 import { User } from '../auth/models/user.model';
 import { prepareProduct } from '../shared/utils/prepareUtils';
-import { languages } from '../shared/constans';
+import { languages, paginationLimit } from '../shared/constans';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel('Product') private productModel: ProductModel,
-    @InjectModel('Category') private categoryModel: Model<CategoryModel>
+    @InjectModel('Category') private categoryModel: Model<CategoryModel>,
   ) {}
 
   async getProducts(getProductsDto: GetProductsDto, lang: string): Promise<ProductsWithPagination> {
@@ -27,7 +27,7 @@ export class ProductsService {
     const options = {
       page: parseFloat(page),
       sort: this.prepareSort(sort, lang),
-      limit: 10,
+      limit: paginationLimit,
       lang,
       price: 'salePrice',
     };
@@ -36,7 +36,7 @@ export class ProductsService {
 
     return {
       ...productsWithPagination,
-      all: productsWithPagination.all.map((product) => prepareProduct(product, lang)),
+      all: productsWithPagination.all.map((product) => prepareProduct(product, lang, true)),
     };
   }
 
@@ -70,6 +70,7 @@ export class ProductsService {
     const newProduct = Object.assign(productReq, {
       _user: user._id,
       dateAdded: Date.now(),
+      images: productReq.images || [],
     });
 
     try {
@@ -151,9 +152,11 @@ export class ProductsService {
       titleUrl: category.titleUrl,
       mainImage: category.mainImage,
       dateAdded: category.dateAdded,
+      subCategories: category.subCategories,
       title: category[lang] ? category[lang].title : category.titleUrl,
       description: category[lang] ? category[lang].description : '',
       visibility: category[lang] ? category[lang].visibility : false,
+      menuHidden: category[lang] ? category[lang].menuHidden : false,
     }));
   };
 
@@ -175,7 +178,7 @@ export class ProductsService {
                 visibility: product.tags.includes(category),
               },
             }),
-            {}
+            {},
           ),
         };
         const found = await this.categoryModel.findOne({ titleUrl });

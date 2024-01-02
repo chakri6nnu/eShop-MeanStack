@@ -76,27 +76,10 @@ GOOGLE_CLIENT_SECRET="set for google login activation"
 # Admin emails get notification from sendgrid when order or contact are submitted
 ADMIN_EMAILS="your@email.com, another@mail.com"
 
-# Recaptcha server key from google
 RECAPTCHA_SERVER_KEY="RECAPTCHA_SERVER_KEY"
-
-# Get location from IP - https://geolocation-db.com
-GEO_LOCATION_API_KEY="GEO_LOCATION_API_KEY"
 
 # FE ENV SEND FROM BE
 FE_STRIPE_PUBLISHABLE_KEY="FE_STRIPE_PUBLISHABLE_KEY"
 FE_TINYMCE_API_KEY="FE_TINYMCE_API_KEY"
 FE_RECAPTCHA_CLIENT_KEY="FE_RECAPTCHA_CLIENT_KEY"
-```
-## Docker
-
-```bash
-# pull docker
-docker pull pararel/eshop-mean:latest
-
-# run docker with env file
-docker run --env-file $PathToEnv --network=host pararel/eshop-mean:latest
-
-# run docker with env set in cmd line
-docker run --e MONGO_URI=mongodbUrl --e OTHER_ENV=otherEnvValue --network=host pararel/eshop-mean:latest
-
 ```

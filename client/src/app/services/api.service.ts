@@ -3,8 +3,7 @@ import { map } from 'rxjs/operators';
 import { Inject, Injectable, Optional, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
-import { FileUploader } from 'ng2-file-upload';
-import { Observable, BehaviorSubject, combineLatest} from 'rxjs';
+import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { Store } from '@ngrx/store';
 
 import * as fromRoot from '../store/reducers';
@@ -12,25 +11,22 @@ import { environment } from '../../environments/environment';
 import { Translations } from '../shared/models';
 import { accessTokenKey } from '../shared/constants';
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
-
   apiUrl = environment.apiUrl;
-  uploaderSub : BehaviorSubject<FileUploader> = new BehaviorSubject(null);
   requestOptions = {};
+  ranNumber = 0;
 
   constructor(
-    private readonly http     : HttpClient,
-    private readonly _window  : WindowService,
-    private store     : Store<fromRoot.State>,
+    private readonly http: HttpClient,
+    private readonly _window: WindowService,
+    private store: Store<fromRoot.State>,
     @Optional() @Inject('serverUrl') protected serverUrl: string,
     @Inject(PLATFORM_ID)
     private platformId: Object
-    ) {
-
+  ) {
     this.setHeaders();
 
     if (environment.production) {
@@ -54,19 +50,9 @@ export class ApiService {
     return this.http.get(userUrl, this.requestOptions);
   }
 
-  handleToken(token) {
-    const tokenUrl = this.apiUrl + '/api/orders/stripe';
-    return this.http.post(tokenUrl, token, this.requestOptions);
-  };
-
-  makeOrder(req) {
-    const addOrder = this.apiUrl + '/api/orders/add';
-    return this.http.post(addOrder, req, this.requestOptions)
-  }
-
   signIn(req) {
     const sendContact = this.apiUrl + '/api/auth/signin';
-    return this.http.post(sendContact, req, this.requestOptions)
+    return this.http.post(sendContact, req, this.requestOptions);
   }
 
   signUp(req) {
@@ -75,22 +61,24 @@ export class ApiService {
   }
 
   getProducts(req) {
-    const {lang, page, sort, category, maxPrice} = req;
-    const addCategory = category ? {category} : {};
+    const { lang, page, sort, category, maxPrice } = req;
+    const addCategory = category ? { category } : {};
     const categoryQuery = category ? '&category=' + category : '';
     const priceQuery = maxPrice ? '&maxPrice=' + maxPrice : '';
-    const productsUrl = this.apiUrl + '/api/products?lang=' + lang + '&page=' + page + '&sort=' + sort + categoryQuery + priceQuery;
-    return this.http.get(productsUrl, this.requestOptions).pipe(map((data: any) => ({
-        products : data.all
-          .map(product =>
-            ({...product,
-              tags: product.tags.filter(Boolean).map((cat: string) => cat.toLowerCase())
-          })),
+    const productsUrl =
+      this.apiUrl + '/api/products?lang=' + lang + '&page=' + page + '&sort=' + sort + categoryQuery + priceQuery;
+    return this.http.get(productsUrl, this.requestOptions).pipe(
+      map((data: any) => ({
+        products: data.all.map((product) => ({
+          ...product,
+          tags: product.tags.filter(Boolean).map((cat: string) => cat.toLowerCase()),
+        })),
         pagination: data.pagination,
         maxPrice: data.maxPrice,
         minPrice: data.minPrice,
-        ...addCategory
-    })))
+        ...addCategory,
+      }))
+    );
   }
 
   getCategories(lang: string) {
@@ -143,6 +131,16 @@ export class ApiService {
     return this.http.delete(removeCategory, this.requestOptions);
   }
 
+  handleToken(token) {
+    const tokenUrl = this.apiUrl + '/api/orders/stripe';
+    return this.http.post(tokenUrl, token, this.requestOptions);
+  }
+
+  makeOrder(req) {
+    const addOrder = this.apiUrl + '/api/orders/add';
+    return this.http.post(addOrder, req, this.requestOptions);
+  }
+
   getUserOrders() {
     const userOrderUrl = this.apiUrl + '/api/orders';
     return this.http.get(userOrderUrl, this.requestOptions);
@@ -168,18 +166,23 @@ export class ApiService {
     return this.http.post(stripeSessionUrl, req, this.requestOptions);
   }
 
-  getCart() {
-    const cartUrl = this.apiUrl + '/api/cart/';
+  getCart(lang?: string) {
+    const withLangQuery = lang ? '?lang=' + lang : '';
+    const cartUrl = this.apiUrl + '/api/cart' + withLangQuery;
     return this.http.get(cartUrl, this.requestOptions);
   }
 
   addToCart(params: string) {
-    const addToCartUrl = this.apiUrl + '/api/cart/add' + params;
+    this.ranNumber = this.ranNumber + 1;
+    const randomNum = '&random=' + this.ranNumber;
+    const addToCartUrl = this.apiUrl + '/api/cart/add' + params + randomNum;
     return this.http.get(addToCartUrl, this.requestOptions);
   }
 
   removeFromCart(params: string) {
-    const removeFromCartUrl = this.apiUrl + '/api/cart/remove' + params;
+    this.ranNumber = this.ranNumber + 1;
+    const randomNum = '&random=' + this.ranNumber;
+    const removeFromCartUrl = this.apiUrl + '/api/cart/remove' + params + randomNum;
     return this.http.get(removeFromCartUrl, this.requestOptions);
   }
 
@@ -193,9 +196,9 @@ export class ApiService {
     return this.http.get(translationsUrl, this.requestOptions);
   }
 
-  editTranslation({lang, keys}) {
+  editTranslation({ lang, keys }) {
     const translationsUpdateUrl = this.apiUrl + '/api/translations?lang=' + lang;
-    return this.http.patch(translationsUpdateUrl, { keys : keys }, this.requestOptions);
+    return this.http.patch(translationsUpdateUrl, { keys: keys }, this.requestOptions);
   }
 
   editAllTranslation(translations: Translations[]) {
@@ -208,35 +211,32 @@ export class ApiService {
     return this.http.get(getImages, this.requestOptions);
   }
 
-  addProductImagesUrl({image, titleUrl}) {
+  addProductImagesUrl({ image, titleUrl }) {
     const titleUrlQuery = titleUrl ? '?titleUrl=' + titleUrl : '';
     const addImageUrl = this.apiUrl + '/api/admin/images/add' + titleUrlQuery;
     return this.http.post(addImageUrl, { image }, this.requestOptions);
   }
 
-  removeImage({image, titleUrl}) {
+  removeImage({ image, titleUrl }) {
     const titleUrlQuery = titleUrl ? '?titleUrl=' + titleUrl : '';
     const removeImage = this.apiUrl + '/api/admin/images/remove' + titleUrlQuery;
     return this.http.post(removeImage, { image }, this.requestOptions);
   }
 
-  getUploader() {
-    return this.uploaderSub.asObservable();
-  }
-
-  setUploader({options, titleUrl}): Observable<any> {
+  uploadImage({fileToUpload, titleUrl}) {
     if (isPlatformBrowser(this.platformId)) {
       const titleUrlQuery = titleUrl ? '?titleUrl=' + titleUrl : '';
       const accessToken = localStorage.getItem(accessTokenKey);
-      const authorizationHeader = accessToken ? {name: 'Authorization', value: 'Bearer ' + accessToken } : {};
+      const formData: FormData = new FormData();
+      formData.append('file', fileToUpload);
 
-      this.uploaderSub.next(new FileUploader({
-        url: this.apiUrl + '/api/admin/images/upload' + titleUrlQuery,
-        headers: [{name: 'Accept', value: 'application/json', ...authorizationHeader}],
-        ...options
-    }));
+      let headers = new HttpHeaders();
+      headers = headers.set('Authorization', 'Bearer ' + accessToken);
+      const sendHeaders = { headers, withCredentials: true };
+      const uploadUrl = this.apiUrl + '/api/admin/images/upload' + titleUrlQuery;
 
-    return this.uploaderSub.asObservable();
+      return this.http.post(uploadUrl, formData,
+        {reportProgress: true, responseType: 'json', ...sendHeaders});
     }
   }
 
@@ -245,9 +245,15 @@ export class ApiService {
     return this.http.post(sendContact, req, this.requestOptions);
   }
 
-  getPages() {
-    const pagesUrl = this.apiUrl + '/api/eshop/page/all';
+  getPages(query?) {
+    const titlesQueryParams = query ? `?titles=${query.titles}&lang=${query.lang}` : '';
+    const pagesUrl = this.apiUrl + '/api/eshop/page/all' + titlesQueryParams;
     return this.http.get(pagesUrl, this.requestOptions);
+  }
+
+  getPage(query) {
+    const pageUrl = this.apiUrl + '/api/eshop/page/' + query.titleUrl + '?lang=' + query.lang;
+    return this.http.get(pageUrl, this.requestOptions);
   }
 
   addOrEditPage(pageReq) {
@@ -260,12 +266,39 @@ export class ApiService {
     return this.http.delete(pageUrl, this.requestOptions);
   }
 
+  getThemes() {
+    const themesUrl = this.apiUrl + '/api/eshop/theme/all';
+    return this.http.get(themesUrl, this.requestOptions);
+  }
+
+  addOrEditTheme(themeReq) {
+    const themeUrl = this.apiUrl + '/api/eshop/theme';
+    return this.http.post(themeUrl, themeReq, this.requestOptions);
+  }
+
+  removeTheme(titleUrl: string) {
+    const themeUrl = this.apiUrl + '/api/eshop/theme/' + titleUrl;
+    return this.http.delete(themeUrl, this.requestOptions);
+  }
+
+  getConfigs() {
+    const configsUrl = this.apiUrl + '/api/eshop/config/all';
+    return this.http.get(configsUrl, this.requestOptions);
+  }
+
+  addOrEditConfig(configReq) {
+    const configUrl = this.apiUrl + '/api/eshop/config';
+    return this.http.post(configUrl, configReq, this.requestOptions);
+  }
+
+  removeConfig(titleUrl: string) {
+    const configUrl = this.apiUrl + '/api/eshop/config/' + titleUrl;
+    return this.http.delete(configUrl, this.requestOptions);
+  }
+
   setHeaders() {
-    combineLatest(
-      this.store.select(fromRoot.getLang),
-      this.store.select(fromRoot.getUser),
-      (lang, user) => ({lang, user})
-      ).subscribe(({lang, user}) => {
+    combineLatest([this.store.select(fromRoot.getLang), this.store.select(fromRoot.getUser)]).subscribe(
+      ([lang, user]) => {
         if (user && user.accessToken && isPlatformBrowser(this.platformId)) {
           localStorage.setItem(accessTokenKey, user.accessToken);
         }
@@ -273,8 +306,7 @@ export class ApiService {
         let headers = new HttpHeaders();
         headers = headers.set('Authorization', 'Bearer ' + accessToken).set('lang', lang);
         this.requestOptions = { headers, withCredentials: true };
-      })
+      }
+    );
   }
-
-
 }

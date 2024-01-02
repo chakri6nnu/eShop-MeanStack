@@ -68,9 +68,6 @@ export enum EshopActions {
   AddProductImagesUrlSuccess = '[Dashboard] AddProductImagesSuccessUrl',
   RemoveProductImage = '[Dashboard] RemoveProductImage',
   RemoveProductImageSuccess = '[Dashboard] RemoveProductImageSuccess',
-  SetUploader = '[Dashboard] SetUploader',
-  SetUploaderSuccess = '[Dashboard] SetUploaderSuccess',
-  SetUploaderError = '[Dashboard] SetUploaderError',
 
   SendContact = '[Eshop] SendContact',
   SendContactSuccess = '[Eshop] SendContactSuccess',
@@ -78,12 +75,33 @@ export enum EshopActions {
   GetPages = '[Eshop] GetPages',
   GetPagesSuccess = '[Eshop] GetPagesSuccess',
   GetPagesFail = '[Eshop] GetPagesFail',
+  GetPage = '[Eshop] GetPage',
+  GetPageSuccess = '[Eshop] GetPageSuccess',
+  GetPageFail = '[Eshop] GetPageFail',
   AddOrEditPage = '[Eshop] AddOrEditPage',
   AddOrEditPageSuccess = '[Eshop] AddOrEditPageSuccess',
   AddOrEditPageFail = '[Eshop] AddOrEditPageFail',
   RemovePage = '[Eshop] RemovePage',
   RemovePageSuccess = '[Eshop] RemovePageSuccess',
-  RemovePageFail = '[Eshop] RemovePageFail'
+  RemovePageFail = '[Eshop] RemovePageFail',
+  GetThemes = '[Eshop] GetThemes',
+  GetThemesSuccess = '[Eshop] GetThemesSuccess',
+  GetThemesFail = '[Eshop] GetThemesFail',
+  AddOrEditTheme = '[Eshop] AddOrEditTheme',
+  AddOrEditThemeSuccess = '[Eshop] AddOrEditThemeSuccess',
+  AddOrEditThemeFail = '[Eshop] AddOrEditThemeFail',
+  RemoveTheme = '[Eshop] RemoveTheme',
+  RemoveThemeSuccess = '[Eshop] RemoveThemeSuccess',
+  RemoveThemeFail = '[Eshop] RemoveThemeFail',
+  GetConfigs = '[Eshop] GetConfigs',
+  GetConfigsSuccess = '[Eshop] GetConfigsSuccess',
+  GetConfigsFail = '[Eshop] GetConfigsFail',
+  AddOrEditConfig = '[Eshop] AddOrEditConfig',
+  AddOrEditConfigSuccess = '[Eshop] AddOrEditConfigSuccess',
+  AddOrEditConfigFail = '[Eshop] AddOrEditConfigFail',
+  RemoveConfig = '[Eshop] RemoveConfig',
+  RemoveConfigSuccess = '[Eshop] RemoveConfigSuccess',
+  RemoveConfigFail = '[Eshop] RemoveConfigFail'
 }
 
 
@@ -149,12 +167,12 @@ export class FilterPrice implements Action {
 
 export class UpdatePosition implements Action {
 readonly type = EshopActions.UpdatePosition;
-  constructor(public payload: any ) {
- }
+  constructor(public payload: any ) {}
 }
 
 export class GetCart implements Action {
   readonly type = EshopActions.GetCart;
+  constructor(public payload?: any ) {}
 }
 
 export class GetCartSuccess implements Action {
@@ -483,24 +501,6 @@ export class AddProductImagesUrlSuccess implements Action {
   }
 }
 
-export class SetUploader implements Action {
-  readonly type = EshopActions.SetUploader;
-  constructor(public payload: any) {
-  }
-}
-
-export class SetUploaderSuccess implements Action {
-  readonly type = EshopActions.SetUploaderSuccess;
-  constructor(public payload: any) {
-  }
-}
-
-export class SetUploaderError implements Action {
-  readonly type = EshopActions.SetUploaderError;
-  constructor(public payload: any) {
-  }
-}
-
 
 // ESHOP
 
@@ -524,7 +524,7 @@ export class SendContactFail implements Action {
 
 export class GetPages implements Action {
   readonly type = EshopActions.GetPages;
-   constructor() {
+   constructor(public payload?: any) {
    }
 }
 
@@ -536,6 +536,24 @@ export class GetPagesSuccess implements Action {
 
 export class GetPagesFail implements Action {
   readonly type = EshopActions.GetPagesFail;
+   constructor() {
+   }
+}
+
+export class GetPage implements Action {
+  readonly type = EshopActions.GetPage;
+   constructor(public payload?: any) {
+   }
+}
+
+export class GetPageSuccess implements Action {
+  readonly type = EshopActions.GetPageSuccess;
+   constructor(public payload: any) {
+   }
+}
+
+export class GetPageFail implements Action {
+  readonly type = EshopActions.GetPageFail;
    constructor() {
    }
 }
@@ -572,6 +590,116 @@ export class RemovePageSuccess implements Action {
 
 export class RemovePageFail implements Action {
   readonly type = EshopActions.RemovePageFail;
+   constructor() {
+   }
+}
+
+
+export class GetThemes implements Action {
+  readonly type = EshopActions.GetThemes;
+   constructor() {
+   }
+}
+
+export class GetThemesSuccess implements Action {
+  readonly type = EshopActions.GetThemesSuccess;
+   constructor(public payload: any) {
+   }
+}
+
+export class GetThemesFail implements Action {
+  readonly type = EshopActions.GetThemesFail;
+   constructor() {
+   }
+}
+
+export class AddOrEditTheme implements Action {
+  readonly type = EshopActions.AddOrEditTheme;
+   constructor(public payload: any) {
+   }
+}
+
+export class AddOrEditThemeSuccess implements Action {
+  readonly type = EshopActions.AddOrEditThemeSuccess;
+   constructor(public payload: any) {
+   }
+}
+
+export class AddOrEditThemeFail implements Action {
+  readonly type = EshopActions.AddOrEditThemeFail;
+   constructor() {
+   }
+}
+
+export class RemoveTheme implements Action {
+  readonly type = EshopActions.RemoveTheme;
+   constructor(public payload: any) {
+   }
+}
+
+export class RemoveThemeSuccess implements Action {
+  readonly type = EshopActions.RemoveThemeSuccess;
+   constructor(public payload: any) {
+   }
+}
+
+export class RemoveThemeFail implements Action {
+  readonly type = EshopActions.RemoveThemeFail;
+   constructor() {
+   }
+}
+
+
+export class GetConfigs implements Action {
+  readonly type = EshopActions.GetConfigs;
+   constructor() {
+   }
+}
+
+export class GetConfigsSuccess implements Action {
+  readonly type = EshopActions.GetConfigsSuccess;
+   constructor(public payload: any) {
+   }
+}
+
+export class GetConfigsFail implements Action {
+  readonly type = EshopActions.GetConfigsFail;
+   constructor() {
+   }
+}
+
+export class AddOrEditConfig implements Action {
+  readonly type = EshopActions.AddOrEditConfig;
+   constructor(public payload: any) {
+   }
+}
+
+export class AddOrEditConfigSuccess implements Action {
+  readonly type = EshopActions.AddOrEditConfigSuccess;
+   constructor(public payload: any) {
+   }
+}
+
+export class AddOrEditConfigFail implements Action {
+  readonly type = EshopActions.AddOrEditConfigFail;
+   constructor() {
+   }
+}
+
+export class RemoveConfig implements Action {
+  readonly type = EshopActions.RemoveConfig;
+   constructor(public payload: any) {
+   }
+}
+
+export class RemoveConfigSuccess implements Action {
+  readonly type = EshopActions.RemoveConfigSuccess;
+   constructor(public payload: any) {
+   }
+}
+
+export class RemoveConfigFail implements Action {
+  readonly type = EshopActions.RemoveConfigFail;
    constructor() {
    }
 }

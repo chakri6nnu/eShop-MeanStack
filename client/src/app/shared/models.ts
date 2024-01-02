@@ -13,7 +13,7 @@ export interface Product {
   title               : string;
   titleUrl            : string;
   description         : string;
-  descriptionFull     : string;
+  descriptionFull     : string[];
   tags                : string[];
   regularPrice        : number;
   salePrice           : number;
@@ -31,6 +31,7 @@ export interface Cart {
   totalQty    : number;
   totalPrice  : number;
   shippingCost?: number;
+  shippingLimit?: number;
   shippingType?: string;
   items       : {
     id? : string;
@@ -46,13 +47,14 @@ export interface Category {
   description?  : string;
   visibility?   : boolean;
   mainImage?    : {url: string; name: string; type?: boolean};
+  subCategories? : string[];
   position      : number;
   [lang: string]: any | { title?: string; description?: string; visibility? : boolean; };
 }
 
 export interface Pagination {
   total     : number;
-  limit     : number;
+  limit?    : number;
   page      : number;
   pages     : number;
   range?    : number[]
@@ -108,4 +110,35 @@ export interface Page {
   titleUrl            : string;
   dateAdded?          : Date;
   [lang: string]      : any | { title?: string; contentHTML?: string };
+}
+
+export interface Theme {
+  _id?                : string;
+  titleUrl            : string;
+  dateAdded?          : Date;
+  active              : boolean;
+  styles: any | {
+    primaryColor: string;
+    secondaryColor: string;
+    backgroundColor: string;
+    mainBackground: string;
+    freeShippingPromo: string;
+    promoSlideBackground: string;
+    promoSlideBackgroundPosition: string;
+    promo: string;
+    logo: string;
+  };
+}
+
+export interface Config {
+  _id?                : string;
+  titleUrl            : string;
+  dateAdded?          : Date;
+  active              : boolean;
+  [lang: string]      : any | {
+    shippingCost: {
+      basic: { cost: number; limit: number; },
+      extended: { cost: number; limit: number; }
+    }
+  }
 }

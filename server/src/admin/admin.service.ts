@@ -19,16 +19,14 @@ export class AdminService {
   constructor(@InjectModel('Product') private productModel: ProductModel) {}
 
   async getImages(images: Images) {
-    return (await images) || new Images([]);
+    return (await images) || new Images({ all: [] });
   }
 
   async addImage(images: Images, imageDto: ImageDto, addImageDto: AddProductImageDto): Promise<Images | Product> {
     const { image } = imageDto;
     const { titleUrl } = addImageDto;
-    const existImages = await new Images(images || []);
-    const product = titleUrl
-      ? await this.productModel.findOneAndUpdate({ titleUrl }, { $push: { images: image } }, { new: true })
-      : null;
+    const existImages = await new Images(images || { all: [] });
+    const product = titleUrl ? await this.productModel.findOneAndUpdate({ titleUrl }, { $push: { images: image } }, { new: true }) : null;
 
     if (!product) {
       existImages.add(image);
@@ -39,13 +37,11 @@ export class AdminService {
 
   async uploadImage(images: Images, file, addImageDto: AddProductImageDto): Promise<Images | Product> {
     const { titleUrl } = addImageDto;
-    const existImages = await new Images(images || []);
+    const existImages = await new Images(images || { all: [] });
     const uploadedImage = await this.uploadToCloudinary(file);
     const image = uploadedImage.secure_url;
 
-    const product = titleUrl
-      ? await this.productModel.findOneAndUpdate({ titleUrl }, { $push: { images: image } }, { new: true })
-      : null;
+    const product = titleUrl ? await this.productModel.findOneAndUpdate({ titleUrl }, { $push: { images: image } }, { new: true }) : null;
 
     if (!product) {
       existImages.add(image);
@@ -57,10 +53,8 @@ export class AdminService {
   async removeImage(images: Images, imageDto: ImageDto, addImageDto: AddProductImageDto): Promise<Images | Product> {
     const { image } = imageDto;
     const { titleUrl } = addImageDto;
-    const existImages = await new Images(images || []);
-    const product = titleUrl
-      ? await this.productModel.findOneAndUpdate({ titleUrl }, { $pull: { images: image } }, { new: true })
-      : null;
+    const existImages = await new Images(images || { all: [] });
+    const product = titleUrl ? await this.productModel.findOneAndUpdate({ titleUrl }, { $pull: { images: image } }, { new: true }) : null;
 
     existImages.remove(image);
 
@@ -80,7 +74,7 @@ export class AdminService {
           } else {
             reject(error);
           }
-        }
+        },
       );
 
       streamifier.createReadStream(file.buffer).pipe(cld_upload_stream);

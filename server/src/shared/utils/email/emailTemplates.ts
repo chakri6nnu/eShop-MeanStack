@@ -1,5 +1,7 @@
-const emailTemplates = (cart, order) => {
-  function prepareCartItems(items) {
+const emailTemplates = (cart, order, translations) => {
+  const keys = translations ? translations['keys'] : {};
+
+  function prepareCartItems(items, currency) {
     return items.map((product) => {
       return `<div style="background-color:transparent;">
         <div
@@ -7,20 +9,20 @@ const emailTemplates = (cart, order) => {
             class="block-grid four-up"
         >
             <div style="border-collapse: collapse;display: table;width: 100%;background-color:#ffffff;">
-  
+
                 <div
                     class="col num3"
                     style="max-width: 320px;min-width: 125px;display: table-cell;vertical-align: top;"
                 >
                     <div style="background-color: transparent; width: 100% !important;">
-  
-  
+
+
                             <div
                                 align="center"
                                 class="img-container center  autowidth  fullwidth"
                                 style="padding-right: 0px;  padding-left: 20px;"
                             >
-  
+
                                 <div style="line-height:10px;font-size:1px"></div>
                                 <img
                                     class="center  autowidth  fullwidth"
@@ -38,23 +40,23 @@ const emailTemplates = (cart, order) => {
                                     style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: block !important;border: 0;height: auto;float: none;width: 100%;max-width: 105px"
                                     width="105"
                                 >
-  
+
                             </div>
-  
+
                         </div>
-  
+
                     </div>
                 </div>
-  
+
                 <div
                     class="col num3"
                     style="max-width: 320px;min-width: 125px;display: table-cell;vertical-align: top;"
                 >
                     <div style="background-color: transparent; width: 100% !important;">
-  
-  
+
+
                             <div class>
-  
+
                                 <div style="color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;line-height:120%; padding-right: 0px; padding-left: 20px; padding-top: 30px; padding-bottom: 0px;">
                                     <div style="font-size:12px;line-height:14px;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;text-align:left;">
                                         <p style="margin: 0;font-size: 12px;line-height: 14px">
@@ -64,22 +66,22 @@ const emailTemplates = (cart, order) => {
                                         </p>
                                     </div>
                                 </div>
-  
+
                             </div>
-  
-  
+
+
                     </div>
                 </div>
-  
+
                 <div
                     class="col num3"
                     style="max-width: 320px;min-width: 125px;display: table-cell;vertical-align: top;"
                 >
                     <div style="background-color: transparent; width: 100% !important;">
-  
-  
+
+
                             <div class>
-  
+
                                 <div style="color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;line-height:120%; padding-right: 10px; padding-left: 10px; padding-top: 30px; padding-bottom: 10px; float: right;">
                                     <div style="font-size:12px;line-height:14px;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;text-align:left;">
                                         <p style="margin: 0;font-size: 12px;line-height: 14px;text-align: right">
@@ -89,28 +91,28 @@ const emailTemplates = (cart, order) => {
                                         </p>
                                     </div>
                                 </div>
-  
+
                             </div>
-  
-  
+
+
                     </div>
                 </div>
-  
+
                 <div
                     class="col num3"
                     style="max-width: 320px;min-width: 125px;display: table-cell;vertical-align: top;"
                 >
                     <div style="background-color: transparent; width: 100% !important;">
-  
-  
+
+
                             <div class>
-  
+
                                 <div style="color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;line-height:120%; padding-right: 25px; padding-left: 10px; padding-top: 25px; padding-bottom: 10px; float: right;">
                                     <div style="font-size:12px;line-height:14px;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;text-align:left;">
                                         <p style="margin: 0;font-size: 12px;line-height: 14px;text-align: right">
                                             <span style="font-size: 16px; line-height: 19px;">${
                                               product.price
-                                            }€ </span>
+                                            } ${currency} </span>
                                         </p>
                                     </div>
                                 </div>
@@ -142,36 +144,36 @@ const emailTemplates = (cart, order) => {
         body {
     margin: 0;
     padding: 0; }
-  
+
   table, tr, td {
     vertical-align: top;
     border-collapse: collapse; }
-  
+
   * {
     line-height: inherit; }
-  
+
   a[x-apple-data-detectors=true] {
     color: inherit !important;
     text-decoration: none !important; }
-  
+
   [owa] .img-container div, [owa] .img-container button {
     display: block !important; }
-  
+
   [owa] .fullwidth button {
     width: 100% !important; }
-  
+
   [owa] .block-grid .col {
     display: table-cell;
     float: none !important;
     vertical-align: top; }
-  
+
   .ie-browser .num12, .ie-browser .block-grid, [owa] .num12, [owa] .block-grid {
     width: 500px !important; }
-  
+
   .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
     line-height: 100%; }
-  
-  
+
+
   @media only screen and (min-width: 520px) {
     .block-grid {
       width: 500px !important; }
@@ -205,7 +207,7 @@ const emailTemplates = (cart, order) => {
       width: 45px !important; }
     .block-grid.twelve-up .col {
       width: 41px !important; } }
-  
+
   @media (max-width: 520px) {
     .block-grid, .col {
       min-width: 320px !important;
@@ -239,7 +241,7 @@ const emailTemplates = (cart, order) => {
       display: none;
       overflow: hidden;
       font-size: 0px; } }
-  
+
       </style>
       </head>
       <body
@@ -257,18 +259,18 @@ const emailTemplates = (cart, order) => {
           width: 100%!important;
           display: block!important;
         }
-  
+
         .col {
           min-width: 320px!important;
           max-width: 100%!important;
           width: 100%!important;
           display: block!important;
         }
-  
+
           .col > div {
             margin: 0 auto;
           }
-  
+
         img.fullwidth {
           max-width: 100%!important;
         }
@@ -313,34 +315,34 @@ const emailTemplates = (cart, order) => {
               <tbody>
                   <tr style="vertical-align: top">
                       <td style="word-break: break-word;border-collapse: collapse !important;vertical-align: top">
-  
-  
+
+
                           <div style="background-color:transparent;">
                               <div
                                   style="Margin: 0 auto;min-width: 320px;max-width: 500px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #ffffff;"
                                   class="block-grid"
                               >
                                   <div style="border-collapse: collapse;display: table;width: 100%;background-color:#ffffff;">
-  
+
                                       <div
                                           class="col num12"
                                           style="min-width: 320px;max-width: 500px;display: table-cell;vertical-align: top;"
                                       >
                                           <div style="background-color: transparent; width: 100% !important;">
-  
-  
+
+
                                                   <div class>
-  
+
                                                       <div style="color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;line-height:120%; padding-right: 10px; padding-left: 10px; padding-top: 10px; padding-bottom: 10px;">
                                                           <div style="font-size:12px;line-height:14px;text-align:center;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;">
                                                               <p style="margin: 0;font-size: 12px;line-height: 14px;text-align: center">
-                                                                  <a style="font-size: 26px; line-height: 31px; color: rgb(153, 153, 153);" href="https://angular-un-ngrx-node-eshop.herokuapp.com/">Eshop
+                                                                  <a style="font-size: 26px; line-height: 31px; color: rgb(153, 153, 153);" href="https://smrtic.eu/">${keys.ESHOP_TITLE || 'Eshop'}
                                                                   </a>
                                                               </p>
                                                           </div>
                                                       </div>
                                                   </div>
-  
+
                                                   <table
                                                       border="0"
                                                       cellpadding="0"
@@ -382,7 +384,7 @@ const emailTemplates = (cart, order) => {
                                                               <p style="margin: 0;font-size: 12px;line-height: 14px;text-align: center">
                                                                   <span style="font-size: 28px; line-height: 33px;">
                                                                       <strong>
-                                                                          <span style="line-height: 33px; font-size: 28px;">${'Thanks for your order'}</span>
+                                                                          <span style="line-height: 33px; font-size: 28px;">${keys.Email_order_title ||'Thanks for your order'}</span>
                                                                       </strong>
                                                                   </span>
                                                                   <br>
@@ -395,45 +397,40 @@ const emailTemplates = (cart, order) => {
                                                           <div style="font-size:12px;line-height:18px;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;text-align:left;">
                                                               <p style="margin: 0;font-size: 12px;line-height: 18px;text-align: center">
                                                                   <span style="font-size: 14px; line-height: 21px;">
-                                                                      ${"You'll receive an email when your items are shipped. If you"}
-                                                                  </span>
-                                                              </p>
-                                                              <p style="margin: 0;font-size: 12px;line-height: 18px;text-align: center">
-                                                                  <span style="font-size: 14px; line-height: 21px;">
-                                                                      ${'have any questions, send mail to'}
+                                                                      ${keys.Email_order_subtitle || "You'll receive an email when your items are shipped. If you have any questions, send mail to"}
                                                                   </span>
                                                               </p>
                                                           </div>
                                                       </div>
                                                   </div>
-  
+
                                                   <div
                                                       align="center"
                                                       class="button-container center"
                                                       style="padding-right: 15px; padding-left: 15px; padding-top:15px; padding-bottom:15px;"
                                                   >
-  
+
                                                       <div style="color: #ffffff; background-color: #3AAEE0; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; max-width: 205px; width: 165px;width: auto; border-top: 0px solid transparent; border-right: 0px solid transparent; border-bottom: 0px solid transparent; border-left: 0px solid transparent; padding-top: 15px; padding-right: 20px; padding-bottom: 15px; padding-left: 20px; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; text-align: center; mso-border-alt: none;">
                                                           <span style="font-size:12px;line-height:24px;">
                                                               <strong>
                                                                   <a
-                                                                      style="font-size: 16px; line-height: 32px;"
-                                                                      data-mce-style="font-size: 16px; line-height: 32px;" href="http://eshop.miroslavsmrtic.sk/en/orders/${
+                                                                      style="font-size: 16px; line-height: 32px; color:#fff; text-decoration: none;"
+                                                                      data-mce-style="font-size: 16px; line-height: 32px;" href="https://smrtic.eu/en/orders/${
                                                                         order.orderId
                                                                       }">
-                                                                      ${'VIEW ORDER STATUS'}
-  
+                                                                      ${keys.Email_order_link || 'VIEW ORDER STATUS'}
+
                                                                   </a>
                                                               </strong>
                                                           </span>
                                                       </div>
-  
+
                                                   </div>
-  
-  
+
+
                                           </div>
                                       </div>
-  
+
                                   </div>
                               </div>
                           </div>
@@ -443,41 +440,37 @@ const emailTemplates = (cart, order) => {
                                   class="block-grid two-up"
                               >
                                   <div style="border-collapse: collapse;display: table;width: 100%;background-color:#e2e2e2;">
-  
+
                                       <div
                                           class="col num6"
                                           style="max-width: 320px;min-width: 250px;display: table-cell;vertical-align: top;"
                                       >
                                           <div style="width: 100% !important;">
-  
-  
+
+
                                                   <div class>
-  
+
                                                       <div style="color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;line-height:150%; padding-right: 10px; padding-left: 10px; padding-top: 10px; padding-bottom: 10px;">
                                                           <div style="line-height:18px;font-size:12px;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;text-align:left;">
                                                               <p style="margin: 0;font-size: 12px;line-height: 18px">
                                                                   <span style="font-size: 16px; line-height: 24px;">
-                                                                      <strong>${'Summary'}:</strong>
+                                                                      <strong>${keys.Email_order_summary || 'Summary'}:</strong>
                                                                   </span>
                                                               </p>
                                                               <p style="margin: 0;font-size: 12px;line-height: 18px">
-                                                                  <span style="font-size: 16px; line-height: 24px;">
-                                                                    ${
-                                                                 order.orderId
-                                                               }</span>
+                                                                  <span style="font-size: 16px; line-height: 24px;">ID: ${order.orderId}</span>
                                                                   <br>
                                                               </p>
                                                               <p style="margin: 0;font-size: 12px;line-height: 18px">
                                                                   <span style="font-size: 16px; line-height: 24px;">
                                                                   ${
-                                                                    order.date
+                                                                    new Date(order.date).toLocaleDateString()
                                                                   }</span>
                                                               </p>
                                                               <p style="margin: 0;font-size: 12px;line-height: 18px">
                                                                   <span style="font-size: 16px; line-height: 24px;">
-                                                                  ${'Order Total'}:        ${
-    cart.totalPrice + ' ' + order.currency
-  }</span>
+                                                                  ${keys.Email_order_total || 'Order Total'}: ${ cart.totalPrice + ' ' + order.currency}
+                                                                  </span>
                                                               </p>
                                                               <p style="margin: 0;font-size: 12px;line-height: 18px"> 
                                                                   <br>
@@ -487,54 +480,49 @@ const emailTemplates = (cart, order) => {
                                                               </p>
                                                           </div>
                                                       </div>
-  
+
                                                   </div>
-  
+
                                           </div>
                                       </div>
-  
+
                                       <div
                                           class="col num6"
                                           style="max-width: 320px;min-width: 250px;display: table-cell;vertical-align: top;"
                                       >
                                           <div style="width: 100% !important;">
-  
-  
+
+
                                                   <div class>
-  
+
                                                       <div style="color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;line-height:150%; padding-right: 10px; padding-left: 10px; padding-top: 10px; padding-bottom: 10px;">
                                                           <div style="font-size:12px;line-height:18px;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;text-align:left;">
                                                               <p style="margin: 0;font-size: 12px;line-height: 18px">
                                                                   <span style="font-size: 16px; line-height: 24px;">
-                                                                      <strong>${'SHIPPING ADDRESS'}:</strong>
+                                                                      <strong>${keys.Email_order_shipping_address || 'SHIPPING ADDRESS'}:</strong>
                                                                   </span>
                                                                   <br>
                                                               </p>
                                                               <p style="margin: 0;font-size: 12px;line-height: 18px">
                                                                   <span style="font-size: 16px; line-height: 24px;">
                                                                   ${
-                                                                    order.adress
-                                                                      .line1
+                                                                    order.address.line1
                                                                   }   ${
-                                                                    order.adress
-                                                                      .line2
+                                                                    order.address.line2
                                                                   }</span>
                                                               </p>
                                                               <p style="margin: 0;font-size: 12px;line-height: 18px">
                                                                   <span style="font-size: 16px; line-height: 24px;">
                                                                   ${
-                                                                    (order
-                                                                      .adress
-                                                                      .city,
-                                                                    order.adress
-                                                                      .zip)
+                                                                    order.address.city
+                                                                  },${
+                                                                    order.address.zip
                                                                   }</span>
                                                               </p>
                                                               <p style="margin: 0;font-size: 12px;line-height: 18px">
                                                                   <span style="font-size: 16px; line-height: 24px;">
                                                                   ${
-                                                                    order.adress
-                                                                      .country
+                                                                    order.address.country
                                                                   }</span>
                                                               </p>
                                                               <p style="margin: 0;font-size: 12px;line-height: 18px">
@@ -545,7 +533,7 @@ const emailTemplates = (cart, order) => {
                                                               </p>
                                                           </div>
                                                       </div>
-  
+
                                                   </div>
                                           </div>
                                       </div>
@@ -558,13 +546,13 @@ const emailTemplates = (cart, order) => {
                                   class="block-grid"
                               >
                                   <div style="border-collapse: collapse;display: table;width: 100%;background-color:#ffffff;">
-  
+
                                       <div
                                           class="col num12"
                                           style="min-width: 320px;max-width: 500px;display: table-cell;vertical-align: top;"
                                       >
                                           <div style="background-color: transparent; width: 100% !important;">
-  
+
                                                   <table
                                                       border="0"
                                                       cellpadding="0"
@@ -600,11 +588,11 @@ const emailTemplates = (cart, order) => {
                                                           </tr>
                                                       </tbody>
                                                   </table>
-  
-  
+
+
                                           </div>
                                       </div>
-  
+
                                   </div>
                               </div>
                           </div>
@@ -614,74 +602,74 @@ const emailTemplates = (cart, order) => {
                                   class="block-grid mixed-two-up"
                               >
                                   <div style="border-collapse: collapse;display: table;width: 100%;background-color:#ffffff;">
-  
+
                                       <div
                                           class="col num4"
                                           style="display: table-cell;vertical-align: top;max-width: 320px;min-width: 164px;"
                                       >
                                           <div style="background-color: #F5F5F5; width: 100% !important;">
-  
+
                                                   <div class>
-  
+
                                                       <div style="color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;line-height:120%; padding-right: 10px; padding-left: 10px; padding-top: 10px; padding-bottom: 10px;">
                                                           <div style="font-size:12px;line-height:14px;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;text-align:left;">
                                                               <p style="margin: 0;font-size: 12px;line-height: 14px">
                                                                   <span style="font-size: 14px; line-height: 16px;">
-                                                                      <strong>${'ITEMS ORDERED'}</strong>
+                                                                      <strong>${keys.Email_order_items_title || 'ITEMS ORDERED'}</strong>
                                                                   </span>
                                                                   <br>
                                                               </p>
                                                           </div>
                                                       </div>
-  
+
                                                   </div>
-  
-  
+
+
                                           </div>
                                       </div>
-  
+
                                       <div
                                           class="col num8"
                                           style="display: table-cell;vertical-align: top;min-width: 320px;max-width: 328px;"
                                       >
                                           <div style="background-color: #F5F5F5; width: 100% !important;">
-  
+
                                                   <div class>
-  
+
                                                       <div style="color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;line-height:120%; padding-right: 10px; padding-left: 10px; padding-top: 10px; padding-bottom: 10px;">
                                                           <div style="font-size:12px;line-height:14px;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;text-align:left;">
                                                               <p style="margin: 0;font-size: 12px;line-height: 14px;text-align: right">
-  
+
                                                                   <br>
                                                               </p>
                                                           </div>
                                                       </div>
-  
+
                                                   </div>
-  
-  
+
+
                                           </div>
                                       </div>
-  
+
                                   </div>
                               </div>
                           </div>
-                          ${prepareCartItems(cart.items)}
-  
+                          ${prepareCartItems(cart.items, order.currency)}
+
                           <div style="background-color:transparent;">
                               <div
                                   style="Margin: 0 auto;min-width: 320px;max-width: 500px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #ffffff;"
                                   class="block-grid"
                               >
                                   <div style="border-collapse: collapse;display: table;width: 100%;background-color:#ffffff;">
-  
+
                                       <div
                                           class="col num12"
                                           style="min-width: 320px;max-width: 500px;display: table-cell;vertical-align: top;"
                                       >
                                           <div style="background-color: transparent; width: 100% !important;">
-  
-  
+
+
                                                   <table
                                                       border="0"
                                                       cellpadding="0"
@@ -717,7 +705,7 @@ const emailTemplates = (cart, order) => {
                                                           </tr>
                                                       </tbody>
                                                   </table>
-  
+
                                           </div>
                                       </div>
                                   </div>
@@ -729,69 +717,66 @@ const emailTemplates = (cart, order) => {
                                   class="block-grid mixed-two-up"
                               >
                                   <div style="border-collapse: collapse;display: table;width: 100%;background-color:#ffffff;">
-  
+
                                       <div
                                           class="col num8"
                                           style="display: table-cell;vertical-align: top;min-width: 320px;max-width: 328px;"
                                       >
                                           <div style="background-color: transparent; width: 100% !important;">
-  
-  
+
+
                                                   <div class>
-  
+
                                                       <div style="color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;line-height:200%; padding-right: 10px; padding-left: 10px; padding-top: 10px; padding-bottom: 10px;">
                                                           <div style="font-size:12px;line-height:24px;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;text-align:left;">
                                                               <p style="margin: 0;font-size: 14px;line-height: 28px;text-align: right">
-                                                                  <span style="font-size: 16px; line-height: 32px;">${'Subtotal'} (${
-    cart.items.length
-  }):</span>
+                                                                  <span style="font-size: 16px; line-height: 32px;">${keys.Email_order_subtotal || 'Subtotal'} (${cart.items.length}):
+                                                                  </span>
                                                               </p>
                                                               <p style="margin: 0;font-size: 14px;line-height: 28px;text-align: right">
-                                                                  <span style="font-size: 16px; line-height: 32px;"> ${'Shipping'}:</span>
+                                                                  <span style="font-size: 16px; line-height: 32px;"> ${keys.Email_order_shipping || 'Shipping'}:</span>
                                                               </p>
-  
-                                                              <p style="margin: 0;font-size: 14px;line-height: 28px;text-align: right">
-                                                                  <span style="font-size: 16px; line-height: 32px;"> ${'Tax'}:</span>
-                                                              </p>
+
+
                                                               <p style="margin: 0;font-size: 14px;line-height: 28px;text-align: right">
                                                                   <strong>
-                                                                      <span style="font-size: 16px; line-height: 32px;">Order ${'Total'}:</span>
+                                                                      <span style="font-size: 16px; line-height: 32px;">Order ${keys.Email_order_total || 'Total'}:</span>
                                                                   </strong>
                                                               </p>
                                                           </div>
                                                       </div>
                                                   </div>
-  
-  
+
+
                                           </div>
                                       </div>
-  
+
                                       <div
                                           class="col num4"
                                           style="display: table-cell;vertical-align: top;max-width: 320px;min-width: 164px;"
                                       >
                                           <div style="background-color: transparent; width: 100% !important;">
-  
-  
+
+
                                                   <div class>
-  
+
                                                       <div style="color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;line-height:200%; padding-right: 10px; padding-left: 10px; padding-top: 10px; padding-bottom: 10px;">
                                                           <div style="font-size:12px;line-height:24px;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;text-align:left;">
                                                               <p style="margin: 0;font-size: 12px;line-height: 24px;text-align: right">
                                                                   <span style="font-size: 16px; line-height: 32px;">${
-                                                                    cart.totalPrice +
+                                                                    (cart.totalPrice - cart.shippingCost) +
                                                                     ' ' +
                                                                     order.currency
                                                                   }</span>
                                                               </p>
                                                               <p style="margin: 0;font-size: 12px;line-height: 24px;text-align: right">
                                                                   <strong>
-                                                                      <span style="font-size: 16px; line-height: 32px; color: rgb(128, 0, 0);">${'FREE'}</span>
+                                                                      <span style="font-size: 16px; line-height: 32px; color: rgb(128, 0, 0);">${cart.shippingCost +
+                                                                        ' ' +
+                                                                        order.currency}</span>
                                                                   </strong>
                                                               </p>
-                                                              <p style="margin: 0;font-size: 12px;line-height: 24px;text-align: right">
-                                                                  <span style="font-size: 16px; line-height: 32px;">${'$0.00'}</span>
-                                                              </p>
+
                                                               <p style="margin: 0;font-size: 12px;line-height: 24px;text-align: right">
                                                                   <span style="color: rgb(128, 0, 0); font-size: 12px; line-height: 24px;">
                                                                       <strong>
@@ -816,53 +801,53 @@ const emailTemplates = (cart, order) => {
                           </div>
                           <div style="background-color:transparent;">
                               <div
-                                  style="Margin: 0 auto;min-width: 320px;max-width: 500px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #ffffff;"
+                                  style="margin: 0 auto;min-width: 320px;max-width: 500px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #ffffff;"
                                   class="block-grid"
                               >
                                   <div style="border-collapse: collapse;display: table;width: 100%;background-color:#ffffff;">
-  
+
                                       <div
                                           class="col num12"
                                           style="min-width: 320px;max-width: 500px;display: table-cell;vertical-align: top;"
                                       >
                                           <div style="background-color: #3AAEE0; width: 100% !important;">
-  
-  
+
+
                                                   <div class>
-  
+
                                                       <div style="color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;line-height:120%; padding-right: 10px; padding-left: 10px; padding-top: 10px; padding-bottom: 10px;">
                                                           <div style="font-size:12px;line-height:14px;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;text-align:left;">
                                                               <p style="margin: 0;font-size: 12px;line-height: 14px;text-align: center">
                                                                   <span style="color: rgb(255, 255, 255); font-size: 16px; line-height: 19px;">
-                                                                  ${'send mail to'}
+                                                                  ${keys.Email_order_send_mail || 'Send mail to'}
                                                                       <strong>${process.env.ADMIN_EMAILS}</strong>
                                                                   </span>
                                                               </p>
                                                           </div>
                                                       </div>
                                                   </div>
-  
-  
+
+
                                           </div>
                                       </div>
                                   </div>
                               </div>
                           </div>
-  
+
                           <div style="background-color:transparent;">
                               <div
-                                  style="Margin: 0 auto;min-width: 320px;max-width: 500px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: transparent;"
+                                  style="margin: 0 auto;min-width: 320px;max-width: 500px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: transparent;"
                                   class="block-grid"
                               >
                                   <div style="border-collapse: collapse;display: table;width: 100%;background-color:transparent;">
-  
+
                                       <div
                                           class="col num12"
                                           style="min-width: 320px;max-width: 500px;display: table-cell;vertical-align: top;"
                                       >
                                           <div style="background-color: transparent; width: 100% !important;">
-  
-  
+
+
                                                   <table
                                                       border="0"
                                                       cellpadding="0"
@@ -898,9 +883,9 @@ const emailTemplates = (cart, order) => {
                                                           </tr>
                                                       </tbody>
                                                   </table>
-  
+
                                                   <div class>
-  
+
                                                       <div style="color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;line-height:120%; padding-right: 10px; padding-left: 10px; padding-top: 10px; padding-bottom: 10px;">
                                                           <div style="font-size:12px;line-height:14px;color:#555555;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;text-align:left;">
                                                               <p style="margin: 0;font-size: 12px;line-height: 14px;text-align: center">
@@ -921,7 +906,7 @@ const emailTemplates = (cart, order) => {
                                                           </div>
                                                       </div>
                                                   </div>
-  
+
                                           </div>
                                       </div>
                                   </div>
@@ -931,7 +916,7 @@ const emailTemplates = (cart, order) => {
                   </tr>
               </tbody>
           </table>
-  
+
       </body>
   </html>`;
 };

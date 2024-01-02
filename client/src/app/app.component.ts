@@ -1,18 +1,19 @@
 import { Component, ElementRef, Renderer2, PLATFORM_ID, Inject } from '@angular/core';
-import { isPlatformBrowser, Location } from '@angular/common';
+import { isPlatformBrowser, isPlatformServer, Location } from '@angular/common';
 import { Store, select } from '@ngrx/store';
-import { filter, take, delay, skip } from 'rxjs/operators';
+import { filter, take, delay, skip, map } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { Router } from '@angular/router';
+import { NavigationStart, Router } from '@angular/router';
 
 import { TranslateService } from './services/translate.service';
+import { JsonLDService } from './services/jsonLD.service';
 import * as fromRoot from './store/reducers';
 import * as actions from './store/actions';
 import { User } from './shared/models';
-import { languages, currencyLang, accessTokenKey } from './shared/constants';
+import { languages, currencyLang } from './shared/constants';
 
 @Component({
-  selector    : 'app-root',
+  selector    : 'eshop-mean-app',
   templateUrl : './app.component.html',
   styleUrls   : ['./app.component.scss']
 })
@@ -22,14 +23,15 @@ export class AppComponent {
   position = 0;
 
   constructor(
-    private elRef     : ElementRef,
-    private renderer  : Renderer2,
-    private store     : Store<fromRoot.State>,
-    private router    : Router,
-    private location  : Location,
-    private translate : TranslateService,
+    private elRef         : ElementRef,
+    private renderer      : Renderer2,
+    private store         : Store<fromRoot.State>,
+    private router        : Router,
+    private location      : Location,
+    private translate     : TranslateService,
+    private jsonLDService : JsonLDService,
     @Inject(PLATFORM_ID)
-    private platformId : Object) {
+    private platformId    : Object) {
 
     this.translate.getLang$()
       .pipe(filter(Boolean), take(1))
@@ -41,16 +43,14 @@ export class AppComponent {
         this.store.dispatch(new actions.ChangeLanguage(langUpdate));
     });
 
-    this.store.dispatch(new actions.GetPages());
-
     this.store.select(fromRoot.getLang)
       .pipe(filter(Boolean), skip(1))
       .subscribe((lang: string) => {
-        const checkLang = this.router.url.split('/').filter(Boolean)[0];
-        if (checkLang && languages.includes(checkLang)) {
-          const urlWithNewLang = this.router.url.replace(checkLang, lang);
-          this.location.replaceState(urlWithNewLang);
-        }
+        // const checkLang = this.router.url.split('/').filter(Boolean)[0];
+        // if (checkLang && languages.includes(checkLang)) {
+        //   const urlWithNewLang = this.router.url.replace(checkLang, lang);
+        //   this.location.replaceState(urlWithNewLang);
+        // }
         translate.use(lang);
     });
 
@@ -78,8 +78,22 @@ export class AppComponent {
     this.translate.getLang$()
       .pipe(filter(lang => !!lang && isPlatformBrowser(this.platformId)))
       .subscribe(lang => {
-        this.store.dispatch(new actions.GetCart());
+        this.store.dispatch(new actions.GetCart(lang));
+        this.store.dispatch(new actions.GetPages({lang, titles: true}));
+      });
+
+    if (isPlatformServer(this.platformId)) {
+      this.jsonLDService.insertSchema(this.jsonLDService.websiteSchema);
+      this.jsonLDService.insertSchema(this.jsonLDService.orgSchema, 'structured-data-org');
+    }
+
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationStart),
+      map((checkRoute: NavigationStart) => {
+        this.jsonLDService.insertSchema(this.jsonLDService.websiteSchema);
+        this.jsonLDService.insertSchema(this.jsonLDService.orgSchema, 'structured-data-org');
       })
+     );
   }
 
   onScrolling(event: Event): void {

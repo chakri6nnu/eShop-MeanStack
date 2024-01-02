@@ -1,12 +1,10 @@
-@import 'variables';
-
 :host {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
 
-  /deep/ .mat-radio-button ~ .mat-radio-button {
-    margin-left: 16px;
+  ::ng-deep .mat-mdc-radio-button {
+    padding-bottom: 24px;
   }
 
   .cart {
@@ -23,6 +21,7 @@
     &-wrap {
       box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
       background: rgba(255, 255, 255, 1);
+      position: relative;
       padding: 0 10px;
       max-width: 600px;
       margin: 0 10px 10px auto;
@@ -37,13 +36,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 20px 10px;
     }
 
     &-items-last {
       border-top: 1px solid rgba(0, 0, 0, 0.1);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       margin-top: 20px;
     }
 
@@ -103,6 +100,7 @@
 
   .order-form-wrap {
     background: #fff;
+    position: relative;
     padding: 10px;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
     max-width: 600px;
@@ -115,11 +113,31 @@
 
   .delivery-button {
     margin: 20px 0;
-    display: block;
+    display: flex;
+    flex-flow: column;
+  }
+
+  .payment-choice {
+    padding: 0 0 0 10px;
+    margin: 10px 0;
+    border-radius: 2px;
+    box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.1);
+    min-height: 80px;
+    display: flex;
+  
+    &--active {
+      background: #1de9b6;
+    }
+  }
+
+  .order-last-summary {
+    display: flex;
+    flex-flow: column;
+    padding: 0 0 20px 20px;
   }
 
   .submit-order-button {
-    margin-top: 25px;
+    margin: 25px 0;
     width: 100%;
   }
 
@@ -132,4 +150,5 @@
     flex: 1;
     margin: 0 5px;
   }
+  
 }

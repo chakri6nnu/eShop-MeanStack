@@ -1,11 +1,10 @@
-import { Routes } from '@angular/router';
-import { BrowserModule, BrowserTransferStateModule } from '@angular/platform-browser';
+import { CategoriesListComponent } from './shared/categories-list/categories-list.component';
+import { Routes, provideRouter } from '@angular/router';
+import { BrowserModule, withHttpTransferCacheOptions } from '@angular/platform-browser';
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
-import { ServiceWorkerModule } from '@angular/service-worker';
-import { TransferHttpCacheModule } from '@nguniversal/common';
+import { HttpClientModule, provideHttpClient, withFetch } from '@angular/common/http';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
@@ -21,19 +20,20 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
 import { PipeModule } from './pipes/pipe.module';
-import { reducers } from './store/reducers/index';
+import { reducers, metaReducers } from './store/reducers/index';
 import { AppEffects } from './store/effects';
-import { HeaderComponent } from './components/header/header.component';
-import { FooterComponent } from './components/footer/footer.component';
 import { routesAll } from './app.routes';
 import { environment } from '../environments/environment';
 import { TranslateService } from './services/translate.service';
-import { EnvConfigurationService } from './services/env-configuration.service';
+import { AppComponent } from './app.component';
+import { HeaderComponent } from './components/header/header.component';
+import { FooterComponent } from './components/footer/footer.component';
 import { HomeComponent } from './components/home/home.component';
-
+import { NotFoundComponent } from './components/not-found/not-found.component';
+import {provideClientHydration} from '@angular/platform-browser';
+import { CarouselComponent } from './shared/carousel/carousel.component';
 
 
 const routes: Routes = routesAll;
@@ -43,18 +43,17 @@ const routes: Routes = routesAll;
     AppComponent,
     HomeComponent,
     HeaderComponent,
-    FooterComponent
+    FooterComponent,
+    NotFoundComponent
   ],
   imports: [
-    BrowserTransferStateModule,
-    BrowserModule.withServerTransition({appId: 'eshop'}),
-    StoreModule.forRoot( reducers ),
+    BrowserModule,
+    StoreModule.forRoot(reducers, { metaReducers }),
     HttpClientModule,
     SharedModule,
     PipeModule,
     ReactiveFormsModule,
     FormsModule,
-    TransferHttpCacheModule,
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
@@ -64,23 +63,22 @@ const routes: Routes = routesAll;
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatSidenavModule,
-    EffectsModule.forRoot([ AppEffects ]),
-    RouterModule.forRoot(routes, { initialNavigation: 'enabled' }),
-    environment.production ? ServiceWorkerModule.register('ngsw-worker.js') : [],
+    CarouselComponent,
+    CategoriesListComponent,
+    EffectsModule.forRoot([AppEffects]),
+    RouterModule.forRoot(routes, { initialNavigation: 'enabledBlocking' }),
     !environment.production ? StoreDevtoolsModule.instrument() : []
   ],
   providers: [
+     provideHttpClient(withFetch()),
+      provideClientHydration(withHttpTransferCacheOptions({
+        includePostRequests: true
+      })),
     CookieService,
     {
       provide: APP_INITIALIZER,
       useFactory: (translateService: TranslateService) => () => translateService.use(''),
-      deps: [ TranslateService ],
-      multi: true
-    },
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (envConfigService: EnvConfigurationService) => () => envConfigService.load().toPromise(),
-      deps: [EnvConfigurationService],
+      deps: [TranslateService],
       multi: true
     }
   ]

@@ -5,6 +5,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { ApiService } from './api.service';
 import { languages } from '../shared/constants';
 import { Translations } from '../shared/models';
+import { take } from 'rxjs/operators';
 
 
 @Injectable({
@@ -12,7 +13,7 @@ import { Translations } from '../shared/models';
 })
 export class TranslateService {
 
-  translationsSub$  : BehaviorSubject<any> = new BehaviorSubject({});
+  translationsSub$  : BehaviorSubject<{[key: string]: string}> = new BehaviorSubject({});
   languageSub$      = new BehaviorSubject('');
   lang: string;
 
@@ -30,13 +31,14 @@ export class TranslateService {
     return this.languageSub$.asObservable();
   }
 
-  getTranslations$(): Observable<any> {
+  getTranslations$(): Observable<{[key: string]: string}> {
     return this.translationsSub$.asObservable();
   }
 
   getTranslationsData(lang: string) {
     try {
-      return this.apiService.getLangTranslations(lang).subscribe(
+      return this.apiService.getLangTranslations(lang).pipe(take(1))
+       .subscribe(
         (translations: Translations) => {
           if (!lang && translations) {
             this.setLang(translations.lang);
@@ -67,9 +69,13 @@ export class TranslateService {
   private setTranslations(lang: string) {
     if (lang) {
       this.setLang(lang);
+    } else {
+      this.setLang(languages[0]);
     }
 
-    return this.getTranslationsData(lang);
+    const langToSend = lang || languages[0];
+
+    return this.getTranslationsData(langToSend);
   }
 
   private setLang(lang: string): void {

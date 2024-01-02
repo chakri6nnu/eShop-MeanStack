@@ -18,9 +18,23 @@ body {
 }
 
 .main {
+  position: relative;
   flex: 1 0 auto;
+  z-index: 1;
+  @include add-main-background(#fff, var(--background-color), 45deg, 1px, 80px);
+}
 
-  @include add-main-background(#fff, $background-color, 45deg, 1px, 80px);
+.main::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-image: var(--main-background-url);
+  background-repeat: no-repeat;
+  z-index: 0;
 }
 
 .container, .container-mid {
@@ -105,4 +119,45 @@ a:hover {
 
 .material-icons.md-48 {
   font-size: 48px;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.margin {
+  &-left-small {
+    margin-left: 5px;
+  }
+
+  &-top-basic {
+    margin-top: 1rem;
+  }
+}
+
+// customize Angular Material
+
+.mdc-card {
+  transition: box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    display: block;
+    position: relative;
+    padding: 16px;
+    border-radius: 4px;
+}
+
+.mdc-evolution-chip__action--presentational {
+  cursor: pointer !important;
+}
+
+.mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background: #fff;
 }

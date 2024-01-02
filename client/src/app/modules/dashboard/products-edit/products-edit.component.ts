@@ -1,7 +1,6 @@
 import { filter, first, take, delay, startWith, map } from 'rxjs/operators';
 import { Component, OnInit, Input, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, BehaviorSubject, from } from 'rxjs';
 
@@ -19,11 +18,11 @@ import { Product, Category } from '../../../shared/models';
 export class ProductsEditComponent implements OnInit, OnDestroy {
   @Input() action: string;
   @Input() titles: string[];
+  @Input() productToEditTitleUrl: string;
 
   @Output() changeTab = new EventEmitter<number>();
 
   productEditForm: FormGroup;
-  uploader: FileUploader;
   images$: Observable<string[]>;
   sendRequest = false;
   descriptionFullSub$: BehaviorSubject<{ [x: string]: string }> = new BehaviorSubject(
@@ -49,6 +48,9 @@ export class ProductsEditComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.store.dispatch(new actions.GetImages());
+    if (this.productToEditTitleUrl) {
+      this.store.dispatch(new actions.GetProduct(this.productToEditTitleUrl));
+    }
     this.filteredTitles$ = this.productEditForm.get('titleUrl').valueChanges.pipe(
       startWith(''),
       map((value) => {
@@ -58,36 +60,16 @@ export class ProductsEditComponent implements OnInit, OnDestroy {
     );
     this.images$ = this.store.select(fromRoot.getProductImages);
 
-    const uploaderOptions = {
-      itemAlias: 'file',
-      autoUpload: true,
-    };
-
-    this.store.dispatch(new actions.SetUploader({ options: uploaderOptions }));
-    this.apiService.getUploader().subscribe((uploader) => {
-      this.uploader = uploader;
-      this.uploader.onErrorItem = (item, response, status, headers) =>
-        this.onErrorItem(item, response, status, headers);
-      this.uploader.onSuccessItem = (item, response, status, headers) =>
-        this.onSuccessItem(item, response, status, headers);
-    });
 
     this.productSub = this.product$.subscribe((product) => {
       const newForm = {
         titleUrl: product.titleUrl,
         mainImage: product.mainImage && product.mainImage.url ? product.mainImage.url : '',
         tags: product.tags,
-        images: product.images,
+        images: product.images || [],
         imageUrl: '',
         ...this.prepareLangEditForm(product),
       };
-
-      const uploaderOptions = {
-        itemAlias: 'file',
-        autoUpload: true,
-      };
-
-      this.store.dispatch(new actions.SetUploader({ options: uploaderOptions, titleUrl: product.titleUrl }));
 
       const prepareDescFull = this.languageOptions
         .map((lang) => ({
@@ -106,17 +88,27 @@ export class ProductsEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSuccessItem(item: FileItem, response: string, status: number, headers: ParsedResponseHeaders): void {
-    const parseResponse = JSON.parse(response);
-    if (parseResponse && parseResponse.titleUrl) {
-      this.store.dispatch(new actions.GetProductSuccess(parseResponse));
-    } else if (parseResponse && parseResponse.all) {
-      this.store.dispatch(new actions.AddProductImagesUrlSuccess(parseResponse));
-    }
-  }
+  onFileChanged(event) {
+    const files = event.target.files;
+    if (files.length === 0)
+        return;
 
-  onErrorItem(item: FileItem, response: string, status: number, headers: ParsedResponseHeaders): void {
-    console.log(JSON.parse(response));
+    const mimeType = files[0].type;
+    if (mimeType.match(/image\/*/) == null) {
+        console.log("Only images are supported.");
+        return;
+    }
+
+    const uploadImage = this.apiService.uploadImage({fileToUpload:files[0], titleUrl: this.productToEditTitleUrl});
+
+    uploadImage.pipe(take(1))
+    .subscribe((result: any) => {
+      if (result && result.titleUrl) {
+        this.store.dispatch(new actions.GetProductSuccess(result));
+      } else if (result && result.all) {
+        this.store.dispatch(new actions.AddProductImagesUrlSuccess(result));
+      }
+    });
   }
 
   onEditorChange(value): void {
@@ -160,54 +152,6 @@ export class ProductsEditComponent implements OnInit, OnDestroy {
       })
       .reduce((prev, curr) => ({ ...prev, ...curr }), {});
     this.descriptionFullSub$.next(prepareDescFull);
-  }
-
-  onSubmit(): void {
-    switch (this.action) {
-      case 'add':
-        this.images$.pipe(first()).subscribe((images) => {
-          if (images && images.length) {
-            this.productEditForm.patchValue({ images: images });
-          }
-
-          const productPrepare = {
-            ...this.productEditForm.value,
-
-            mainImage: {
-              url: this.productEditForm.value.mainImage,
-              name: this.productEditForm.value.titleUrl,
-            },
-            ...this.prepareProductData(this.languageOptions, this.productEditForm.value),
-          };
-
-          this.store.dispatch(new actions.AddProduct(productPrepare));
-        });
-        break;
-
-      case 'edit':
-        const editProduct = Object.keys(this.productEditForm.value)
-          .filter((key) => !!this.productEditForm.value[key])
-          .reduce((prev, curr) => ({ ...prev, [curr]: this.productEditForm.value[curr] }), {});
-
-        const productPrepare = {
-          ...editProduct,
-          mainImage: {
-            url: this.productEditForm.value.mainImage,
-            name: this.productEditForm.value.titleUrl,
-          },
-          ...this.prepareProductData(this.languageOptions, editProduct),
-        };
-
-        this.store.dispatch(new actions.EditProduct(productPrepare));
-        break;
-    }
-
-    this.sendRequest = true;
-  }
-
-  onRemoveSubmit(): void {
-    this.store.dispatch(new actions.RemoveProduct(this.productEditForm.get('titleUrl').value));
-    this.sendRequest = true;
   }
 
   addTag(): void {
@@ -255,6 +199,54 @@ export class ProductsEditComponent implements OnInit, OnDestroy {
       const titleUrlFormated = e.target.value.replace(/\s+/g, '-').toLowerCase();
       this.productEditForm.get('titleUrl').setValue(titleUrlFormated);
     }
+  }
+
+  onSubmit(): void {
+    switch (this.action) {
+      case 'add':
+        this.images$.pipe(first()).subscribe((images) => {
+          if (images && images.length) {
+            this.productEditForm.patchValue({ images: images });
+          }
+
+          const productPrepare = {
+            ...this.productEditForm.value,
+
+            mainImage: {
+              url: this.productEditForm.value.mainImage,
+              name: this.productEditForm.value.titleUrl,
+            },
+            ...this.prepareProductData(this.languageOptions, this.productEditForm.value),
+          };
+
+          this.store.dispatch(new actions.AddProduct(productPrepare));
+        });
+        break;
+
+      case 'edit':
+        const editProduct = Object.keys(this.productEditForm.value)
+          .filter((key) => !!this.productEditForm.value[key])
+          .reduce((prev, curr) => ({ ...prev, [curr]: this.productEditForm.value[curr] }), {});
+
+        const productPrepareEdit = {
+          ...editProduct,
+          mainImage: {
+            url: this.productEditForm.value.mainImage,
+            name: this.productEditForm.value.titleUrl,
+          },
+          ...this.prepareProductData(this.languageOptions, editProduct),
+        };
+
+        this.store.dispatch(new actions.EditProduct(productPrepareEdit));
+        break;
+    }
+
+    this.sendRequest = true;
+  }
+
+  onRemoveSubmit(): void {
+    this.store.dispatch(new actions.RemoveProduct(this.productEditForm.get('titleUrl').value));
+    this.sendRequest = true;
   }
 
   private createLangForm(languageOptions: Array<string>) {

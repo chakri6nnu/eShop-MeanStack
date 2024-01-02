@@ -11,11 +11,12 @@ import { Product } from '../models';
 export class ProductsListComponent {
   @Input()  products    : Product[];
   @Input()  cartIds     : {[productId: string]: number};
-  @Input()  convertVal  : number;
   @Input()  currency    : string;
   @Input()  lang        : string;
+  @Input()  showEdit    = false;
   @Output() addProduct     = new EventEmitter<string>();
   @Output() removeProduct  = new EventEmitter<string>();
+  @Output() editProduct    = new EventEmitter<string>();
 
 
   constructor() {}
@@ -28,7 +29,9 @@ export class ProductsListComponent {
     this.removeProduct.emit(id);
   }
 
-  trackById(_index: number, item: Product) {
-    return item._id;
+  onEditProduct(id: string): void {
+    this.editProduct.emit(id);
   }
+
+
 }

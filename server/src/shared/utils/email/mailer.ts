@@ -1,17 +1,23 @@
-import * as sgMail from '@sendgrid/mail';
+import sgMail from '@sendgrid/mail';
 
 import { getContent } from './email-utils';
 
 sgMail.setApiKey(process.env.SENDGRID_KEY);
 
-export const sendMsg = async (email: string, emailType) => {
+export const sendMsg = async (email: string, emailType, translations) => {
   const msg = {
     to: email,
-    from: 'no-reply@eshop.sk',
+    from: process.env.EMAIL_FROM,
     subject: emailType.subject,
-    html: getContent(emailType),
+    html: getContent(emailType, translations),
   };
+  try {
+    return await sgMail.send(msg);
+  } catch (error) {
+    console.error(error);
 
-  const response = await sgMail.send(msg);
-  return response;
+    if (error.response) {
+      console.error(error.response.body)
+    }
+  }
 };

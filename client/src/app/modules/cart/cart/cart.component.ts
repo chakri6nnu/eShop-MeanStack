@@ -1,4 +1,5 @@
-import { map, filter, take } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { map, filter, take, withLatestFrom } from 'rxjs/operators';
 import { Component } from '@angular/core';
 import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -21,7 +22,6 @@ export class CartComponent {
   order$      : Observable<Order>;
   user$       : Observable<User>;
   orderForm   : FormGroup;
-  convertVal$ : Observable<number>;
   currency$   : Observable<string>;
   toggleCard = false;
   productUrl  : string;
@@ -33,6 +33,7 @@ export class CartComponent {
   constructor(
     private store: Store<fromRoot.State>,
     private fb: FormBuilder,
+    private router: Router,
     private location: Location,
     private translate: TranslateService) {
 
@@ -46,15 +47,22 @@ export class CartComponent {
     this.orderForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', Validators.required],
-      adress: ['', Validators.required],
+      address: ['', Validators.required],
       city: ['', Validators.required],
       country: ['', Validators.required],
       zip: ['', Validators.required],
       notes: ['']
     });
 
-    this.convertVal$ = this.store.select(fromRoot.getConvertVal);
     this.currency$ = this.store.select(fromRoot.getCurrency);
+
+    this.order$.pipe(
+      filter(order => !!order),
+      withLatestFrom(this.lang$),
+      take(1))
+      .subscribe(([order, lang]) => {
+        this.router.navigate(['/' + lang + '/cart/summary'])
+      });
   }
 
   goBack(): void {
@@ -74,7 +82,7 @@ export class CartComponent {
         name        : this.orderForm.value.name,
         city        : this.orderForm.value.city,
         country     : this.orderForm.value.country,
-        line1       : this.orderForm.value.adress,
+        line1       : this.orderForm.value.address,
         line2       : '',
         zip         : this.orderForm.value.zip,
       }]
@@ -94,7 +102,7 @@ export class CartComponent {
         name        : this.orderForm.value.name,
         city        : this.orderForm.value.city,
         country     : this.orderForm.value.country,
-        line1       : this.orderForm.value.adress,
+        line1       : this.orderForm.value.address,
         line2       : '',
         zip         : this.orderForm.value.zip,
       }];

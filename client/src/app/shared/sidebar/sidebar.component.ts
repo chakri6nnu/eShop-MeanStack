@@ -4,22 +4,20 @@ import { take, delay } from 'rxjs/operators';
 
 import { Category } from '../models';
 
-
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SidebarComponent  {
+export class SidebarComponent {
   @Input() categories: Category[];
   @Input() activeCategory?: string;
-  @Input() minPrice: number;
-  @Input() maxPrice: number;
+  @Input() minPrice: number = 0;
+  @Input() maxPrice: number = Infinity;
   @Input() price: number;
-  @Input() sortOptions: {name: string; id: string}[];
+  @Input() sortOptions: { name: string; id: string }[];
   @Input() choosenSort: string;
-  @Input() convertVal : number;
   @Input() currency: string;
   @Input() lang: string;
 
@@ -29,20 +27,23 @@ export class SidebarComponent  {
 
   productsUrl: string;
   categoryUrl: string;
+  priceValue = 0;
 
-  constructor() {
-  }
+  constructor() {}
 
   onInputChange($event: string): void {
     this.changeSort.emit($event);
   }
 
-  onChangePrice(event, value: number): void {
-    of('chane_price').pipe(take(1), delay(200)).subscribe(() => {
-      this.changePrice.emit(value);
-    });
-
+  onChangePrice(value: number): void {
+    of('change_price')
+      .pipe(take(1), delay(200))
+      .subscribe(() => {
+        this.changePrice.emit(value);
+      });
   }
 
-
+  trackById(_index: number, item) {
+    return item.titleUrl;
+  }
 }

@@ -1,6 +1,8 @@
-import { filter, map, take, distinctUntilChanged, skip } from 'rxjs/operators';
+import { JsonLDService } from './../../../services/jsonLD.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { filter, map, take, distinctUntilChanged, skip, withLatestFrom } from 'rxjs/operators';
 import { Component, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, combineLatest, Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { Location } from '@angular/common';
@@ -19,14 +21,14 @@ import { TranslateService } from '../../../services/translate.service';
   styleUrls: ['./product.component.scss'],
 })
 export class ProductComponent implements OnDestroy {
-  items$: Observable<{ product: Product; cartIds: { [productId: string]: number } }>;
   categories$: Observable<Category[]>;
   productLoading$: Observable<boolean>;
-  convertVal$: Observable<number>;
   currency$: Observable<string>;
   lang$: Observable<string>;
   routeSub: Subscription;
   categoriesSub: Subscription;
+  product$: Observable<Product>;
+  cartIds$: Observable<{ [productId: string]: number }>;
 
   constructor(
     private route: ActivatedRoute,
@@ -35,44 +37,53 @@ export class ProductComponent implements OnDestroy {
     private meta: Meta,
     private title: Title,
     public dialog: MatDialog,
-    private translate: TranslateService
+    private snackBar: MatSnackBar,
+    private router: Router,
+    private translate: TranslateService,
+    private jsonLDService: JsonLDService,
   ) {
     this.lang$ = this.translate.getLang$();
     this.categories$ = this.store.select(fromRoot.getCategories);
-
-    this.routeSub = combineLatest(this.lang$, this.route.params.pipe(map((params) => params['id'])), (lang, id) => ({
-      lang,
-      id,
-    })).subscribe(({ lang, id }) => {
+    this.routeSub = combineLatest([this.lang$, this.route.params.pipe(map((params) => params['id']))]).subscribe(([lang, id]) => {
       this.store.dispatch(new actions.GetProduct(id + '?lang=' + lang));
     });
+
+    this.currency$ = this.store.select(fromRoot.getCurrency);
 
     this.callCategories();
 
     this.setMetaData();
     this.productLoading$ = this.store.select(fromRoot.getProductLoading);
-
-    this.items$ = combineLatest(
-      this.store.select(fromRoot.getProduct),
-      this.store.select(fromRoot.getCart).pipe(
-        filter(Boolean),
-        map((cart: Cart) => cart.items)
-      ),
-      (product, cartItems) => {
-        return {
-          product,
-          cartIds: cartItems.reduce((prev, curr) => ({ ...prev, [curr.id]: curr.qty }), {}),
-        };
-      }
+    this.product$ = this.store.select(fromRoot.getProduct);
+    this.cartIds$ = this.store.select(fromRoot.getCart).pipe(
+      filter(Boolean),
+      map((cart: Cart) => cart.items.reduce((prev, curr) => ({ ...prev, [curr.id]: curr.qty }), {})),
     );
-
-    this.convertVal$ = this.store.select(fromRoot.getConvertVal);
-    this.currency$ = this.store.select(fromRoot.getCurrency);
   }
 
   cartEvent(id: string, type: string): void {
     if (type === 'add') {
       this.store.dispatch(new actions.AddToCart('?id=' + id));
+
+      this.translate
+        .getTranslations$()
+        .pipe(
+          map((translations) =>
+            translations
+              ? { message: translations['ADDED_TO_CART'] || 'Added to cart', action: translations['TO_CART'] || 'To Cart' }
+              : { message: 'Added to cart', action: 'To Cart' },
+          ),
+          take(1),
+        )
+        .subscribe(({ message, action }) => {
+          let snackBarRef = this.snackBar.open(message, action, { duration: 3000 });
+          snackBarRef
+            .onAction()
+            .pipe(withLatestFrom(this.lang$), take(1))
+            .subscribe(([_, lang]) => {
+              this.router.navigate(['/' + lang + '/cart']);
+            });
+        });
     }
     if (type === 'remove') {
       this.store.dispatch(new actions.RemoveFromCart('?id=' + id));
@@ -101,12 +112,9 @@ export class ProductComponent implements OnDestroy {
   }
 
   private callCategories(): void {
-    combineLatest(this.categories$.pipe(take(1)), this.lang$.pipe(take(1)), (categories, lang) => ({
-      categories,
-      lang,
-    }))
+    combineLatest([this.categories$.pipe(take(1)), this.lang$.pipe(take(1))])
       .pipe(take(1))
-      .subscribe(({ categories, lang }) => {
+      .subscribe(([categories, lang]) => {
         if (!categories.length) {
           this.store.dispatch(new actions.GetCategories(lang));
         }
@@ -122,11 +130,26 @@ export class ProductComponent implements OnDestroy {
       .select(fromRoot.getProduct)
       .pipe(
         filter((product: Product) => !!product && !!product.title),
-        take(1)
+        withLatestFrom(this.currency$),
+        take(1),
       )
-      .subscribe((product) => {
+      .subscribe(([product, currency]) => {
         this.title.setTitle(product.title);
         this.meta.updateTag({ name: 'description', content: product.description });
+        const productSchema = {
+          '@context': 'https://schema.org/',
+          '@type': 'Product',
+          name: product.title,
+          image: product.mainImage?.url,
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: currency,
+            price: product.regularPrice,
+            availability: product.stock === 'onStock' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+          },
+          description: product.description,
+        };
+        this.jsonLDService.insertSchema(productSchema, 'structured-data-product');
       });
   }
 }

@@ -1,22 +1,36 @@
-@import 'variables';
-
 :host {
   width: 100%;
   position: relative;
+  display: block;
 
   .slider-container {
     display: flex;
     position: relative;
     width: 100%;
     align-items:  center;
+    border-radius: 3px;
+
+    &.slider-with-background {
+      background: #fdfdfd;
+    }
   }
 
-  /deep/ .mat-raised-button.slider-arrow  {
+  ::ng-deep .mat-mdc-raised-button.slider-arrow  {
     max-width: 40px;
     min-width: 40px;
     padding: 10px;
     min-height: 100px;
-    border: 1px solid rgba(0,0,0,0.2);
+    z-index: 1;
+    background: none;
+    box-shadow: none;
+
+    &-right {
+      right: 0;
+    }
+
+    &-absolute {
+      position: absolute;
+    }
   }
 
   .slides {
@@ -24,6 +38,9 @@
     overflow-x: scroll;
     scroll-behavior: smooth;
     width: 100%;
+    max-width: 100%;
+    scrollbar-color: transparent;
+    margin-bottom: -15px;
 
     &::-webkit-scrollbar {
       width: 0;

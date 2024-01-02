@@ -12,16 +12,15 @@ import { Product } from '../../../shared/models';
 export class AllProductsComponent {
   allProduct$ : Observable<Product[]>;
   getProductsSub: Subscription;
-  convertVal$ : Observable<number>;
   currency$   : Observable<string>;
   lang$       : Observable<string>;
 
   @Input() allProducts: Product[];
   @Input() lang: string;
-  @Input() convertVal: string;
   @Input() currency: string;
 
   @Output() getAllProducts = new EventEmitter();
+  @Output() editProduct = new EventEmitter<string>();
 
   constructor() {
   }

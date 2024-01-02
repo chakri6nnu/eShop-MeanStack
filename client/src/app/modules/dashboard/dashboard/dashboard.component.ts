@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
@@ -7,6 +7,7 @@ import * as fromRoot from '../../../store/reducers';
 import * as actions from '../../../store/actions'
 import { TranslateService } from '../../../services/translate.service';
 import { Product } from '../../../shared/models';
+import { MatTabGroup } from '@angular/material/tabs';
 
 
 @Component({
@@ -16,20 +17,20 @@ import { Product } from '../../../shared/models';
 })
 export class DashboardComponent implements OnDestroy {
 
+  @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
+
   productAction = '';
   lang$: Observable<string>;
-  convertVal$ : Observable<number>;
   currency$   : Observable<string>;
   allProducts$ : Observable<Product[]>;
   allProductsTitles$: Observable<string[]>;
   getProductsSub: Subscription;
-  activeTab: number;
+  productToEditTitleUrl: string;
 
   readonly component = 'dashboard';
 
   constructor(private translate: TranslateService, private store: Store<fromRoot.State>) {
     this.lang$          = this.translate.getLang$();
-    this.convertVal$    = this.store.select(fromRoot.getConvertVal);
     this.currency$      = this.store.select(fromRoot.getCurrency);
     this.allProducts$    = this.store.select(fromRoot.getAllProducts);
     this.allProductsTitles$    = this.store.select(fromRoot.getAllProducts).pipe(
@@ -45,8 +46,14 @@ export class DashboardComponent implements OnDestroy {
     this.store.dispatch(new actions.GetAllProducts());
   }
 
+  setToEditProduct(titleUrl: string): void {
+    this.productToEditTitleUrl = titleUrl;
+    this.tabGroup.selectedIndex = 2;
+    this.store.dispatch(new actions.UpdatePosition({ dashboard: 0 }));
+  }
+
   changeTab(tab: number) {
-    this.activeTab = tab;
+    this.tabGroup.selectedIndex = tab;
     this.store.dispatch(new actions.GetAllProducts());
   }
 
