@@ -18,9 +18,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AppComponent } from './app.component';
-import { ProductsComponent } from './components/products/products.component';
 import { SharedModule } from './shared/shared.module';
 import { PipeModule } from './pipes/pipe.module';
 import { reducers } from './store/reducers/index';
@@ -31,7 +32,8 @@ import { routesAll } from './app.routes';
 import { environment } from '../environments/environment';
 import { TranslateService } from './services/translate.service';
 import { EnvConfigurationService } from './services/env-configuration.service';
-import { languages } from './shared/constants';
+import { HomeComponent } from './components/home/home.component';
+
 
 
 const routes: Routes = routesAll;
@@ -39,7 +41,7 @@ const routes: Routes = routesAll;
 @NgModule({
   declarations: [
     AppComponent,
-    ProductsComponent,
+    HomeComponent,
     HeaderComponent,
     FooterComponent
   ],
@@ -60,6 +62,8 @@ const routes: Routes = routesAll;
     MatAutocompleteModule,
     MatInputModule,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatSidenavModule,
     EffectsModule.forRoot([ AppEffects ]),
     RouterModule.forRoot(routes, { initialNavigation: 'enabled' }),
     environment.production ? ServiceWorkerModule.register('ngsw-worker.js') : [],

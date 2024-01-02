@@ -5,7 +5,6 @@ export interface Product extends Document {
     title: string;
     description: string;
     descriptionFull: any;
-    categories: string[];
     tags: string[];
     regularPrice: number;
     salePrice: number;
@@ -17,12 +16,19 @@ export interface Product extends Document {
     mainImage: { url: string; name: string };
     images: string[];
     _user: any;
-    dateAdded?          : Date;
+    dateAdded?: Date;
 }
 
+export interface PaginateOptions {
+  sort: string;
+  price: string;
+  page: number;
+  limit: number;
+  lang: string;
+}
 
 export interface ProductModel extends Model<Product> {
-    paginate(query: any, options: {sort: string; page: number; limit: number}): DocumentQuery<ProductsWithPagination, Product>;
+    paginate(query: any, options: PaginateOptions): DocumentQuery<ProductsWithPagination, Product>;
 }
 
 export interface ProductsWithPagination {

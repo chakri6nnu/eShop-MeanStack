@@ -10,8 +10,6 @@ const getProductLangInfo = (): {[lang: string]: {}} => {
       { title: String,
         description: String,
         descriptionFull: [],
-        categories: [],
-        tags: [],
         regularPrice: Number,
         salePrice: Number,
         onSale: Boolean,
@@ -29,6 +27,7 @@ const ProductSchema = new Schema({
     name: { type: String, trim: true },
   },
   images: [],
+  tags: [],
   _user: { type: Schema.Types.ObjectId, ref: 'user' },
   dateAdded: Date,
   ...getProductLangInfo()

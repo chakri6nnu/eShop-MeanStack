@@ -1,17 +1,16 @@
 import { WindowService } from './window.service';
-import { map, filter } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { Inject, Injectable, Optional, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { FileUploader } from 'ng2-file-upload';
-import { Observable, BehaviorSubject} from 'rxjs';
+import { Observable, BehaviorSubject, combineLatest} from 'rxjs';
 import { Store } from '@ngrx/store';
 
 import * as fromRoot from '../store/reducers';
 import { environment } from '../../environments/environment';
-import { Translations, Pagination } from '../shared/models';
-import { countryLang, accessTokenKey } from '../shared/constants';
-
+import { Translations } from '../shared/models';
+import { accessTokenKey } from '../shared/constants';
 
 
 @Injectable({
@@ -76,29 +75,27 @@ export class ApiService {
   }
 
   getProducts(req) {
-    const {lang, page, sort, category} = req;
+    const {lang, page, sort, category, maxPrice} = req;
     const addCategory = category ? {category} : {};
     const categoryQuery = category ? '&category=' + category : '';
-    const productsUrl = this.apiUrl + '/api/products?lang=' + lang + '&page=' + page + '&sort=' + sort + categoryQuery;
+    const priceQuery = maxPrice ? '&maxPrice=' + maxPrice : '';
+    const productsUrl = this.apiUrl + '/api/products?lang=' + lang + '&page=' + page + '&sort=' + sort + categoryQuery + priceQuery;
     return this.http.get(productsUrl, this.requestOptions).pipe(map((data: any) => ({
         products : data.all
-          .map(product => ({...product,
-              categories: product.categories.filter(Boolean).map((cat: string) => cat.toLowerCase()),
-              tags: product.tags.map((tag: string) => tag ? tag.toLowerCase() : '')})),
-        pagination: {
-          limit: data.limit,
-          page: data.page,
-          pages: data.pages,
-          total: data.total,
-          range: Array(data.pages).fill(0).map((v, i) => i + 1)
-        } as Pagination,
+          .map(product =>
+            ({...product,
+              tags: product.tags.filter(Boolean).map((cat: string) => cat.toLowerCase())
+          })),
+        pagination: data.pagination,
+        maxPrice: data.maxPrice,
+        minPrice: data.minPrice,
         ...addCategory
     })))
   }
 
-  getCategories() {
-    const categoriesUrl = this.apiUrl + '/api/products/categories';
-    return this.http.get(categoriesUrl, this.requestOptions)
+  getCategories(lang: string) {
+    const categoriesUrl = this.apiUrl + '/api/products/categories?lang=' + lang;
+    return this.http.get(categoriesUrl, this.requestOptions);
   }
 
   getProductsSearch(query: string) {
@@ -129,6 +126,21 @@ export class ApiService {
   removeProduct(name: string) {
     const removeProduct = this.apiUrl + '/api/products/' + name;
     return this.http.delete(removeProduct, this.requestOptions);
+  }
+
+  getAllCategories() {
+    const categoriesUrl = this.apiUrl + '/api/products/categories/all';
+    return this.http.get(categoriesUrl, this.requestOptions);
+  }
+
+  editCategory(category) {
+    const eidtCategory = this.apiUrl + '/api/products/categories/edit';
+    return this.http.patch(eidtCategory, category, this.requestOptions);
+  }
+
+  removeCategory(name: string) {
+    const removeCategory = this.apiUrl + '/api/products/categories/' + name;
+    return this.http.delete(removeCategory, this.requestOptions);
   }
 
   getUserOrders() {
@@ -249,8 +261,14 @@ export class ApiService {
   }
 
   setHeaders() {
-    this.store.select(fromRoot.getLang)
-      .subscribe(lang => {
+    combineLatest(
+      this.store.select(fromRoot.getLang),
+      this.store.select(fromRoot.getUser),
+      (lang, user) => ({lang, user})
+      ).subscribe(({lang, user}) => {
+        if (user && user.accessToken && isPlatformBrowser(this.platformId)) {
+          localStorage.setItem(accessTokenKey, user.accessToken);
+        }
         const accessToken = isPlatformBrowser(this.platformId) ? localStorage.getItem(accessTokenKey) : '';
         let headers = new HttpHeaders();
         headers = headers.set('Authorization', 'Bearer ' + accessToken).set('lang', lang);

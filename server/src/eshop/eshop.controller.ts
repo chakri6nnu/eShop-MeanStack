@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Body,
-  Session,
-  Post,
-  Get,
-  UseGuards,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Body, Session, Post, Get, UseGuards, Param, Delete } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 import { EshopService } from './eshop.service';
@@ -22,18 +13,19 @@ export class EshopController {
 
   @Get('/config')
   getConfig(): { config: string } {
-    return {
-      config: Buffer.from(
-        JSON.stringify(
-          Object.keys(process.env)
-            .filter((key) => key.includes('FE_'))
-            .reduce(
-              (prev, curr) => ({ ...prev, [curr]: process.env[curr] }),
-              {},
-            ),
-        ),
-      ).toString('base64'),
-    };
+    try {
+      return {
+        config: Buffer.from(
+          JSON.stringify(
+            Object.keys(process.env)
+              .filter((key) => key.includes('FE_'))
+              .reduce((prev, curr) => ({ ...prev, [curr]: process.env[curr] }), {})
+          )
+        ).toString('base64'),
+      };
+    } catch {
+      return { config: '' };
+    }
   }
 
   @Post('/contact')

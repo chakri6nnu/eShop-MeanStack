@@ -1,4 +1,4 @@
-import { filter, first, take, delay } from 'rxjs/operators';
+import { filter, first, take, delay, startWith, map } from 'rxjs/operators';
 import { Component, OnInit, Input, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
@@ -6,15 +6,15 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription, BehaviorSubject, from } from 'rxjs';
 
 import * as fromRoot from '../../../store/reducers';
-import * as actions from '../../../store/actions'
+import * as actions from '../../../store/actions';
 import { ApiService } from '../../../services/api.service';
 import { languages } from '../../../shared/constants';
-import { Product } from '../../../shared/models';
+import { Product, Category } from '../../../shared/models';
 
 @Component({
   selector: 'app-products-edit',
   templateUrl: './products-edit.component.html',
-  styleUrls: ['./products-edit.component.scss']
+  styleUrls: ['./products-edit.component.scss'],
 })
 export class ProductsEditComponent implements OnInit, OnDestroy {
   @Input() action: string;
@@ -26,63 +26,78 @@ export class ProductsEditComponent implements OnInit, OnDestroy {
   uploader: FileUploader;
   images$: Observable<string[]>;
   sendRequest = false;
-  descriptionFullSub$: BehaviorSubject<{ [x: string]: string }>
-    = new BehaviorSubject(languages.reduce((prev, lang) => ({...prev, [lang]: ''}) , {}));
+  descriptionFullSub$: BehaviorSubject<{ [x: string]: string }> = new BehaviorSubject(
+    languages.reduce((prev, lang) => ({ ...prev, [lang]: '' }), {})
+  );
   product$: Observable<Product>;
+  categories$: Observable<Category[]>;
   productSub: Subscription;
   languageOptions = languages;
   choosenLanguageSub$ = new BehaviorSubject(languages[0]);
   testImageUrl: string;
+  filteredTitles$: Observable<string[]>;
+  tag: string;
 
   constructor(private fb: FormBuilder, private store: Store<fromRoot.State>, private apiService: ApiService) {
     this.createForm();
-    this.product$ = this.store.select(fromRoot.getProduct).pipe(
-      filter(product => !!product && !!product.titleUrl && !product.title));
+    this.product$ = this.store
+      .select(fromRoot.getProduct)
+      .pipe(filter((product) => !!product && !!product.titleUrl && !product.title));
+    this.categories$ = this.store.select(fromRoot.getCategories);
+    this.store.dispatch(new actions.GetCategories(languages[0]));
   }
 
   ngOnInit(): void {
     this.store.dispatch(new actions.GetImages());
+    this.filteredTitles$ = this.productEditForm.get('titleUrl').valueChanges.pipe(
+      startWith(''),
+      map((value) => {
+        const filterValue = value.toLowerCase();
+        return this.titles.filter((option) => option.toLowerCase().includes(filterValue));
+      })
+    );
     this.images$ = this.store.select(fromRoot.getProductImages);
 
     const uploaderOptions = {
       itemAlias: 'file',
-      autoUpload: true
-    }
+      autoUpload: true,
+    };
 
-    this.store.dispatch(new actions.SetUploader({ options: uploaderOptions }))
-    this.apiService.getUploader().subscribe(uploader => {
+    this.store.dispatch(new actions.SetUploader({ options: uploaderOptions }));
+    this.apiService.getUploader().subscribe((uploader) => {
       this.uploader = uploader;
-      this.uploader.onErrorItem = (item, response, status, headers) => this.onErrorItem(item, response, status, headers);
-      this.uploader.onSuccessItem = (item, response, status, headers) => this.onSuccessItem(item, response, status, headers);
-    })
+      this.uploader.onErrorItem = (item, response, status, headers) =>
+        this.onErrorItem(item, response, status, headers);
+      this.uploader.onSuccessItem = (item, response, status, headers) =>
+        this.onSuccessItem(item, response, status, headers);
+    });
 
-    this.productSub = this.product$
-      .subscribe((product) => {
+    this.productSub = this.product$.subscribe((product) => {
+      const newForm = {
+        titleUrl: product.titleUrl,
+        mainImage: product.mainImage && product.mainImage.url ? product.mainImage.url : '',
+        tags: product.tags,
+        images: product.images,
+        imageUrl: '',
+        ...this.prepareLangEditForm(product),
+      };
 
-        const newForm = {
-          titleUrl  : product.titleUrl,
-          mainImage : (product.mainImage && product.mainImage.url) ? product.mainImage.url : '',
-          images    : product.images,
-          imageUrl  : '',
-          ...this.prepareLangEditForm(product)
-        };
+      const uploaderOptions = {
+        itemAlias: 'file',
+        autoUpload: true,
+      };
 
-        const uploaderOptions = {
-          itemAlias: 'file',
-          autoUpload: true
-        }
+      this.store.dispatch(new actions.SetUploader({ options: uploaderOptions, titleUrl: product.titleUrl }));
 
-        this.store.dispatch(new actions.SetUploader({ options: uploaderOptions, titleUrl: product.titleUrl }))
+      const prepareDescFull = this.languageOptions
+        .map((lang) => ({
+          [lang]: product[lang].descriptionFull.length ? product[lang].descriptionFull[0] : '',
+        }))
+        .reduce((prev, curr) => ({ ...prev, ...curr }), {});
 
-        const prepareDescFull = this.languageOptions
-          .map(lang => ({
-            [lang]: product[lang].descriptionFull.length ? product[lang].descriptionFull[0] : ''
-          })).reduce((prev, curr) => ({ ...prev, ...curr }), {});
-
-        this.descriptionFullSub$.next(prepareDescFull);
-        this.productEditForm.setValue(newForm);
-      });
-
+      this.descriptionFullSub$.next(prepareDescFull);
+      this.productEditForm.setValue(newForm);
+    });
   }
 
   ngOnDestroy(): void {
@@ -105,94 +120,108 @@ export class ProductsEditComponent implements OnInit, OnDestroy {
   }
 
   onEditorChange(value): void {
-    this.choosenLanguageSub$
-      .pipe(filter(Boolean), take(1))
-      .subscribe((lang: string) => {
-        this.productEditForm.get(lang).patchValue({ descriptionFull: value });
-      });
+    this.choosenLanguageSub$.pipe(filter(Boolean), take(1)).subscribe((lang: string) => {
+      this.productEditForm.get(lang).patchValue({ descriptionFull: value });
+    });
   }
 
   createForm(): void {
     this.productEditForm = this.fb.group({
-      titleUrl  : ['', Validators.required],
-      mainImage : '',
-      images    : [],
-      imageUrl  : '',
-      ...this._createLangForm(this.languageOptions)
+      titleUrl: ['', Validators.required],
+      mainImage: '',
+      tags: [[]],
+      images: [],
+      imageUrl: '',
+      ...this.createLangForm(this.languageOptions),
     });
   }
 
   onRemoveImage(image: string, type: string): void {
-    const titleUrl = type === 'product'
-      ? { titleUrl: this.productEditForm.get('titleUrl').value }
-      : {};
+    const titleUrl = type === 'product' ? { titleUrl: this.productEditForm.get('titleUrl').value } : {};
 
     this.store.dispatch(new actions.RemoveProductImage({ image: image, ...titleUrl }));
   }
 
   setLang(lang: string): void {
     this.choosenLanguageSub$.next('');
-    from(lang).pipe(delay(100))
+    from(lang)
+      .pipe(delay(100))
       .subscribe(() => {
         this.choosenLanguageSub$.next(lang);
       });
 
-
     const prepareDescFull = this.languageOptions
-      .map(language => {
+      .map((language) => {
         const descriptionFull = this.productEditForm.get([language]).value.descriptionFull;
         return {
-        [language]: typeof descriptionFull === 'string'
-          ? descriptionFull
-          : descriptionFull.length ? descriptionFull[0] : ''
-      }}).reduce((prev, curr) => ({ ...prev, ...curr }), {});
+          [language]:
+            typeof descriptionFull === 'string' ? descriptionFull : descriptionFull.length ? descriptionFull[0] : '',
+        };
+      })
+      .reduce((prev, curr) => ({ ...prev, ...curr }), {});
     this.descriptionFullSub$.next(prepareDescFull);
   }
 
   onSubmit(): void {
-
     switch (this.action) {
       case 'add':
-        this.images$.pipe(first())
-          .subscribe(images => {
-            if (images && images.length) {
-              this.productEditForm.patchValue({ images: images });
-            }
+        this.images$.pipe(first()).subscribe((images) => {
+          if (images && images.length) {
+            this.productEditForm.patchValue({ images: images });
+          }
 
-            const productPrepare = {
-              ...this.productEditForm.value,
+          const productPrepare = {
+            ...this.productEditForm.value,
 
-              mainImage: { url: this.productEditForm.value.mainImage, name: this.productEditForm.value.titleUrl },
-              ...this.prepareProductData(this.languageOptions, this.productEditForm.value)
-            };
+            mainImage: {
+              url: this.productEditForm.value.mainImage,
+              name: this.productEditForm.value.titleUrl,
+            },
+            ...this.prepareProductData(this.languageOptions, this.productEditForm.value),
+          };
 
-            this.store.dispatch(new actions.AddProduct(productPrepare));
-          })
+          this.store.dispatch(new actions.AddProduct(productPrepare));
+        });
         break;
 
       case 'edit':
         const editProduct = Object.keys(this.productEditForm.value)
-          .filter(key => !!this.productEditForm.value[key])
+          .filter((key) => !!this.productEditForm.value[key])
           .reduce((prev, curr) => ({ ...prev, [curr]: this.productEditForm.value[curr] }), {});
 
         const productPrepare = {
           ...editProduct,
-          images: [],
-          mainImage: { url: this.productEditForm.value.mainImage, name: this.productEditForm.value.titleUrl },
-          ...this.prepareProductData(this.languageOptions, editProduct)
+          mainImage: {
+            url: this.productEditForm.value.mainImage,
+            name: this.productEditForm.value.titleUrl,
+          },
+          ...this.prepareProductData(this.languageOptions, editProduct),
         };
 
         this.store.dispatch(new actions.EditProduct(productPrepare));
-
-        break;
-
-      case 'remove':
-        this.store.dispatch(new actions.RemoveProduct(this.productEditForm.get('titleUrl').value));
         break;
     }
 
     this.sendRequest = true;
+  }
 
+  onRemoveSubmit(): void {
+    this.store.dispatch(new actions.RemoveProduct(this.productEditForm.get('titleUrl').value));
+    this.sendRequest = true;
+  }
+
+  addTag(): void {
+    if (this.tag) {
+      const formTags = this.productEditForm.value.tags.filter((tag) => tag !== this.tag);
+      const tags = [...formTags, this.tag.replace(/ /g, '_').toLowerCase()];
+      this.productEditForm.get('tags').setValue(tags);
+      this.tag = '';
+    }
+  }
+
+  removeTag(tagToRemove: string): void {
+    const formTags = this.productEditForm.value.tags.filter((tag) => tag !== tagToRemove);
+    this.productEditForm.get('tags').setValue(formTags);
   }
 
   addImageUrl(): void {
@@ -226,10 +255,9 @@ export class ProductsEditComponent implements OnInit, OnDestroy {
       const titleUrlFormated = e.target.value.replace(/\s+/g, '-').toLowerCase();
       this.productEditForm.get('titleUrl').setValue(titleUrlFormated);
     }
-
   }
 
-  private _createLangForm(languageOptions: Array<string>) {
+  private createLangForm(languageOptions: Array<string>) {
     return languageOptions
       .map((lang: string) => ({
         [lang]: this.fb.group({
@@ -237,16 +265,14 @@ export class ProductsEditComponent implements OnInit, OnDestroy {
           description: '',
           salePrice: '',
           regularPrice: '',
-          tags: '',
-          categories: '',
           descriptionFull: '',
           visibility: false,
           stock: 'onStock',
           onSale: false,
-          shiping: 'basic'
-        })
-      })
-      ).reduce((prev, curr) => ({ ...prev, ...curr }), {});
+          shipping: 'basic',
+        }),
+      }))
+      .reduce((prev, curr) => ({ ...prev, ...curr }), {});
   }
 
   private prepareLangEditForm(product) {
@@ -255,25 +281,19 @@ export class ProductsEditComponent implements OnInit, OnDestroy {
         const productLang = product[lang];
         return {
           [lang]: {
-            title         : productLang.title || '',
-            description   : productLang.description || '',
-            salePrice     : productLang.salePrice || '',
-            regularPrice  : productLang.regularPrice || '',
-            tags          : productLang.tags
-              ? productLang.tags.reduce((string, tag) => (string ? string + ',' : string) + tag, '')
-              : '',
-            categories    : productLang.categories
-              ? productLang.categories.reduce((string, tag) => (string ? string + ',' : string) + tag, '')
-              : '',
-            descriptionFull : productLang.descriptionFull || '',
-            visibility      : product.visibility || true,
-            stock           : product.stock || 'onStock',
-            onSale          : product.onSale || true,
-            shiping         : product.shiping || 'basic'
-          }
-        }}
-      ).reduce((prev, curr) => ({ ...prev, ...curr }), {});
-
+            title: productLang.title || '',
+            description: productLang.description || '',
+            salePrice: productLang.salePrice || '',
+            regularPrice: productLang.regularPrice || '',
+            descriptionFull: productLang.descriptionFull || '',
+            visibility: !!productLang.visibility,
+            stock: productLang.stock || 'onStock',
+            onSale: !!productLang.onSale,
+            shipping: productLang.shipping || 'basic',
+          },
+        };
+      })
+      .reduce((prev, curr) => ({ ...prev, ...curr }), {});
   }
 
   private prepareProductData(languageOptions: Array<string>, formData) {
@@ -281,11 +301,8 @@ export class ProductsEditComponent implements OnInit, OnDestroy {
       .map((lang: string) => ({
         [lang]: {
           ...formData[lang],
-          tags      : formData[lang].tags ? formData[lang].tags.split(',') : [],
-          categories: formData[lang].categories ? formData[lang].categories.split(',') : []
-        }
-      })).reduce((prev, curr) => ({ ...prev, ...curr }), {});
+        },
+      }))
+      .reduce((prev, curr) => ({ ...prev, ...curr }), {});
   }
-
-
 }

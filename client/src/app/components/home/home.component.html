@@ -1,0 +1,94 @@
+<mat-drawer-container
+  class="home-sidebar-container"
+  autosize
+  hasBackdrop>
+  <mat-drawer
+    #sideBar
+    [(opened)]="sidebarOpened"
+    class="home-sidebar"
+    mode="over">
+    <app-sidebar
+      [class.disabled]="loadingProducts$ | async"
+      [categories]="categories$ | async"
+      [price]="filterPrice$ | async"
+      [maxPrice]="maxPrice$ | async"
+      [minPrice]="minPrice$ | async"
+      [activeCategory]="category$ | async"
+      [sortOptions]="sortOptions"
+      [convertVal]="convertVal$ | async"
+      [currency]="currency$ | async"
+      [lang]="lang$ | async"
+      [choosenSort]="sortBy$ | async"
+      (changePrice)="priceRange($event)"
+      (changeSort)="changeSort($event)"
+      (changeCategory)="changeCategory()">
+    </app-sidebar>
+  </mat-drawer>
+  <mat-drawer-content>
+    <div class="main">
+      <div class="home-product" *ngIf="(products$ | async) as products">
+        <app-carousel>
+          <ng-container *ngFor="let product of products | slice:0:3">
+            <app-product-content *ngIf="(cartIds$ | async) as cartIds"
+              [product]="product"
+              [categories]="categories$ | async"
+              [cartIds]="cartIds"
+              [currency]="currency$ | async"
+              [convertVal]="convertVal$ | async"
+              [lang]="lang$ | async"
+              [withLink]="true"
+              (addProduct)="addToCart($event)"
+              (removeProduct)="removeFromCart($event)">
+            </app-product-content>
+          </ng-container>
+        </app-carousel>
+      </div>
+      <div class="home-primary-header"
+        *ngIf="(categories$ | async)?.length">
+        <div class="home-primary-container">
+          <span class="home-mobile-filter" (click)="toggleSidebar()">
+            <i class="material-icons md-16">filter_list</i>
+          </span>
+          <h1 class="home-title">{{'Categories' | translate | async}}</h1>
+        </div>
+      </div>
+      <div class="container">
+        <mat-progress-bar mode="indeterminate" *ngIf="loadingProducts$ | async"></mat-progress-bar>
+        <div *ngIf="(categories$ | async) as categories">
+          <app-categories-list
+            [categories]="categories"
+            [lang]="lang$ | async">
+          </app-categories-list>
+        </div>
+      </div>
+      <div
+        class="home-primary-header"
+        *ngIf="(products$ | async)">
+        <div class="home-primary-container">
+          <h1 class="home-title">{{'Products' | translate | async}}</h1>
+        </div>
+      </div>
+      <div class="container">
+        <mat-spinner class="home-spinner" *ngIf="loadingProducts$ | async"></mat-spinner>
+        <div *ngIf="(products$ | async) as products">
+          <app-products-list
+            [class.disabled]="loadingProducts$ | async"
+            [products]="products"
+            [cartIds]="cartIds$ | async"
+            [convertVal]="convertVal$ | async"
+            [currency]="currency$ | async"
+            [lang]="lang$ | async"
+            (addProduct)="addToCart($event)"
+            (removeProduct)="removeFromCart($event)">
+          </app-products-list>
+          <app-pagination
+            [class.disabled]="loadingProducts$ | async"
+            *ngIf="(pagination$ | async) as pagination"
+            [pagination]="pagination"
+            (changePage)="changePage($event)">
+          </app-pagination>
+        </div>
+      </div>
+  </div>
+  </mat-drawer-content>
+</mat-drawer-container>

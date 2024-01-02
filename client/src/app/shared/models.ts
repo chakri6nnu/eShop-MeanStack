@@ -14,7 +14,6 @@ export interface Product {
   titleUrl            : string;
   description         : string;
   descriptionFull     : string;
-  categories          : string[];
   tags                : string[];
   regularPrice        : number;
   salePrice           : number;
@@ -31,6 +30,8 @@ export interface Product {
 export interface Cart {
   totalQty    : number;
   totalPrice  : number;
+  shippingCost?: number;
+  shippingType?: string;
   items       : {
     id? : string;
     item: Product
@@ -40,8 +41,13 @@ export interface Cart {
 }
 
 export interface Category {
-  title     : string;
-  titleUrl  : string;
+  titleUrl      : string;
+  title?        : string;
+  description?  : string;
+  visibility?   : boolean;
+  mainImage?    : {url: string; name: string; type?: boolean};
+  position      : number;
+  [lang: string]: any | { title?: string; description?: string; visibility? : boolean; };
 }
 
 export interface Pagination {

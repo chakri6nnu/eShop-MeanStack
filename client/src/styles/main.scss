@@ -17,6 +17,56 @@ body {
   width: 100%;
 }
 
+.main {
+  flex: 1 0 auto;
+
+  @include add-main-background(#fff, $background-color, 45deg, 1px, 80px);
+}
+
+.container, .container-mid {
+  padding: 15px;
+
+  @media screen and (max-width: 600px) {
+    padding: 5px !important;
+  }
+}
+
+.container-mid {
+  max-width: 1000px;
+  margin: auto;
+}
+
+.sidebar-layout {
+  display: grid;
+  display: -ms-grid;
+  grid-template-areas: "sidebar main";
+  grid-template-columns: 200px 1fr;
+  -ms-grid-columns: 200px 1fr;
+  grid-column-gap: 15px;
+
+  .main-wrap {
+    grid-area: main;
+  }
+
+  .sidebar-wrap {
+    grid-area: sidebar;
+    position: relative;
+  }
+
+  @media screen and (max-width: 600px) {
+    grid-template-areas: "sidebar" "main";
+    grid-template-columns: auto;
+
+    .main-wrap {
+      grid-area: main;
+    }
+
+    .sidebar-wrap {
+      grid-area: sidebar;
+    }
+  }
+}
+
 a {
   text-decoration: none;
   color: #fff;
@@ -25,7 +75,16 @@ a {
 
 a:hover {
   text-decoration: none;
-  color: theme-color('secondary');
+}
+
+.clickable {
+  cursor: pointer !important;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
 }
 
 .material-icons.md-16 {
@@ -46,58 +105,4 @@ a:hover {
 
 .material-icons.md-48 {
   font-size: 48px;
-}
-
-.main {
-  flex: 1 0 auto;
-
-  @include add-main-background($primary-color, #fff, 45deg, 1px, 80px);
-}
-
-.container {
-  padding: 15px;
-
-  @media screen and (max-width: 600px) {
-    padding: 5px !important;
-  }
-}
-
-.sidebar-layout {
-  display: grid;
-  display: -ms-grid;
-  grid-template-areas: "sidebar main";
-  grid-template-columns: 200px 1fr;
-  -ms-grid-columns: 200px 1fr;
-  grid-column-gap: 15px;
-
-  .main-wrap {
-    grid-area: main;
-  }
-
-  .sidebar-wrap {
-    grid-area: sidebar;
-  }
-
-  @media screen and (max-width: 600px) {
-    grid-template-areas: "sidebar" "main";
-    grid-template-columns: auto;
-
-    .main-wrap {
-      grid-area: main;
-    }
-
-    .sidebar-wrap {
-      grid-area: sidebar;
-    }
-  }
-}
-
-.clickable {
-  cursor: pointer;
-}
-
-.disabled {
-  opacity: 0.5;
-  cursor: not-allowed !important;
-  pointer-events: none !important;
 }

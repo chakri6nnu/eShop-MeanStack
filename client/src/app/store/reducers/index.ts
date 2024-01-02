@@ -41,6 +41,8 @@ export const getOrder = createSelector(Products, fromProducts.order);
 export const getUserOrders = createSelector(Products, fromProducts.userOrders);
 export const getProductTitles = createSelector(Products, fromProducts.productsTitles);
 export const getPriceFilter = createSelector(Products, fromProducts.priceFilter);
+export const getMaxPrice = createSelector(Products, fromProducts.maxPrice);
+export const getMinPrice = createSelector(Products, fromProducts.minPrice);
 export const getPosition = createSelector(Products, fromProducts.position);
 
 export const getOrderId = createSelector(Dashboard, fromDashboard.order);
@@ -48,7 +50,7 @@ export const getOrders = createSelector(Dashboard, fromDashboard.orders);
 export const getProductImages = createSelector(Dashboard, fromDashboard.productImages);
 export const getAllTranslations = createSelector(Dashboard, fromDashboard.translations);
 export const getAllProducts = createSelector(Dashboard, fromDashboard.allProducts);
-
+export const getAllCategories = createSelector(Dashboard, fromDashboard.allCategories);
 
 export const getPages = createSelector(Eshop, fromEshop.pages);
 export const getEshopLoading = createSelector(Eshop, fromEshop.loading);

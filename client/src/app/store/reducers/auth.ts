@@ -12,12 +12,12 @@ export interface State {
   convertVal: number;
 }
 
- export const initialState: State = {
-    loading: false,
-    user: null,
-    lang: languages[0],
-    currency: currencyLang['default'],
-    convertVal: 0,
+export const initialState: State = {
+  loading: false,
+  user: null,
+  lang: languages[0],
+  currency: currencyLang['default'],
+  convertVal: 0,
 };
 
 
@@ -36,8 +36,12 @@ export function appReducer(state = initialState, action): State {
       return { ...state, user: action.payload, loading: false };
     }
 
+    case EshopActions.SignIn: {
+      return { ...state, loading: true};
+    }
+
     case EshopActions.SignInSuccess: {
-      return { ...state, user: action.payload };
+      return { ...state, user: action.payload, loading: false };
     }
 
     case EshopActions.ChangeLanguage: {
